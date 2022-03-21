@@ -103,6 +103,16 @@ const NewStore = (props: Props) => {
   }
 
   const submit = async () => {
+    if(typeof products === 'undefined' || products.length <= 0) {
+      console.log('dsa')
+      toast.error('Add Products')
+      return
+    }
+    if(typeof fields === 'undefined' || fields.length <= 0) {
+      toast.error('Add Fields')
+      return
+    }
+
     const toastId = toast.loading('Creating Store')
     try {
       var data = await fetch('/api/pages/create', {
@@ -170,7 +180,7 @@ const NewStore = (props: Props) => {
           type="text"
           name="Store"
           value={slug}
-          onChange={(e) => setSlug(e.target.value)}
+          onChange={(e) => setSlug(e.target.value.toLowerCase())}
           className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
         />
       </div>

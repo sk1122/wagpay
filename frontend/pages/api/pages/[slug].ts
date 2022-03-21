@@ -24,9 +24,17 @@ interface Page {
 async function create(req: NextApiRequest, res: NextApiResponse<any | string>) {	
 	if(req.method === 'GET') {
 		const slug = req.query['slug']
+		const user = req.query['username']
+
+		if(!slug || !user) {
+			res.status(400).send({ error: 'forgot user or slug' })
+			return
+		}
+
 		let { data, error } = await supabase
 			.from('pages')
-			.select('*')
+			.select('*,user!inner(*)')
+			.eq('user.username', user)
 			.eq('slug', slug)
 		console.log(data)
 		if(!data || error || data?.length === 0) {
@@ -40,7 +48,7 @@ async function create(req: NextApiRequest, res: NextApiResponse<any | string>) {
 			.eq('page_id', data[0].id)
 			
 		if(!productData || error || productData?.length === 0) {
-			res.status(400).send('Page was not created ' + JSON.stringify(productError))
+			res.status(400).send('Page was not crexated ' + JSON.stringify(productError))
 			return
 		}
 
