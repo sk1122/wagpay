@@ -10,20 +10,29 @@ interface Props {
 
 const Product = (props: Props) => {
 	const [isOpen, setIsOpen] = useState(false)
-	const [checked, setChecked] = useState(false)
+	const [noProducts, setNoProducts] = useState(0)
 
-	const handleCheckChange = (e: any) => {
-		setChecked(e.target.checked)
-		if(e.target.checked) {
+	const handleCheckChange = (changed: boolean) => {
+		if(changed) {
+			console.log('1')
 			props.add([props.product])
+			setNoProducts((ps) => {
+				return ps + 1
+			})
 		} else {
+			console.log('2')
 			console.log(1)
 			props.remove([props.product])
+			setNoProducts((ps) => {
+				return ps - 1
+			})
 		}
 	}
 
 	useEffect(() => {
-		if(props.productIds && props.productIds.length > 0) setChecked(props.productIds.includes(props.product.id.toString()))
+		if(props.productIds && props.productIds.length > 0) {
+			handleCheckChange(true)	
+		}
 	}, [])
 
 	return (
@@ -42,13 +51,15 @@ const Product = (props: Props) => {
 					}
 					<h1 className="text-xl font-bold select-none">{props.product.name}</h1>
 				</div>
-				<input checked={checked} type="checkbox" onChange={(e) => handleCheckChange(e)} name="" id="" />
+				<button onClick={(e) => handleCheckChange(true)} name="" id="">+</button>
+				<p>{noProducts}</p>
+				<button onClick={(e) => handleCheckChange(false)} name="" id="">-</button>
 			</div>
 			<div className={(isOpen ? "" : "hidden ") + "w-full p-3 space-y-3"}>
-				<img src="https://png2.cleanpng.com/sh/b5f8f61ac2e665b21d0a1791394a8bbc/L0KzQYm3VMAzN5RvfZH0aYP2gLBuTgN1badqRdVqcnXvfH70ifNpaZZxReVsb4T3PcXvhb1wbpdue9c2ZIfsd7n7TgNkcKN6Rdlqbnf2hLb5TcVia2M4TdZuZXLlcrO6Tsc5PGI6UaQCMUW1QoeAV8IyPGo7Tag3cH7q/kisspng-steve-carell-michael-scott-the-office-dwight-schru-gangster-5ac235deebbbb3.7841592715226772149656.png" alt="" className="w-36 h-36" />
 				<p className="text-md font-normal">
 					{props.product.description}
-					{props.product.price} / {props.product.discounted_price}
+					<br />
+					$ {props.product.discounted_price}
 				</p>
 				<div className="flex flex-col space-y-3">
 					{props.product.links.map(value => (

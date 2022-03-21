@@ -97,8 +97,7 @@ const Store = ({ store }: Props) => {
 
 	const addNewProduct = async (productId: ProductInterface[]) => {
 		let unique: ProductInterface[] = [
-			//@ts-ignore
-			...new Map([...selectedProducts, ...productId].map((item) => [item["id"], item])).values(),
+			...selectedProducts, ...productId
 		]
 
 		let totalValue = 0
