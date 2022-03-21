@@ -2,12 +2,12 @@ import { useRouter } from "next/router"
 import { ChangeEvent, useEffect, useRef, useState } from "react"
 import { useAccount, useConnect, useSignMessage } from "wagmi"
 import EthereumQRPlugin from 'ethereum-qr-code'
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { createQR, encodeURL, findTransactionSignature, FindTransactionSignatureError, validateTransactionSignature } from '@solana/pay'
 import BigNumber from 'bignumber.js';
 import { ethers } from "ethers";
 import { ExternalProvider } from "@ethersproject/providers";
-import * as splToken from '@solana/spl-token/src'
+import { getAccount, getAssociatedTokenAddress, transfer, TOKEN_PROGRAM_ID, createTransferInstruction } from '@solana/spl-token'
 import toast from 'react-hot-toast'
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
@@ -15,7 +15,7 @@ import Authereum from "authereum";
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
-type supported_currencies = 'Ethereum' | 'Solana' | 'USDC (Ethereum)'
+type supported_currencies = 'Ethereum' | 'Solana' | 'USDC (Ethereum)' | 'USDC (Solana)'
 
 const currencies = [
 	{
@@ -27,10 +27,10 @@ const currencies = [
 		},
 		'Solana': {
 			wallets: ['Phantom']
+		},
+		'USDC (Solana)': {
+			wallets: ['Phantom']
 		}
-		// 'USDC (Solana)': {
-		// 	wallets: ['Phantom']
-		// }
 	}
 ]
 
@@ -381,6 +381,60 @@ const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, set
 				var txId = await createTransaction(email, fields, eth, '')
 				await updateTransaction(txId, false, '')
 			}
+		} else if(option.toLowerCase() == 'usdc (solana)') {
+			const toastIdConnect = toast.loading('Connecting Solana Wallet')
+			try {
+				await connectSOL()
+			} catch(e) {
+				toast.dismiss(toastIdConnect)
+				toast.error('Solana Wallet Not Connected')
+				return
+			}
+			const solProvider = window.solana
+			const solConnection = new Connection(clusterApiUrl('devnet'))
+			toast.dismiss(toastIdConnect)
+			toast.success('Successfully Connected Phantom')
+			
+			toastIdTransact = toast.loading('Creating Solana Transaction')
+
+			const tokenAccount = await getAssociatedTokenAddress(new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'), solProvider.publicKey)
+			
+			const tokenAccountInfo = await getAccount(
+				solConnection,
+				tokenAccount
+			)
+			console.log(merchantSOL)
+
+			const merchantTokenAccount = await getAssociatedTokenAddress(new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'), new PublicKey(merchantSOL))
+			
+			const merchantTokenAccountInfo = await getAccount(
+				solConnection,
+				merchantTokenAccount
+			)
+
+			console.log(tokenAccountInfo)
+
+			const instructions: TransactionInstruction = 
+                createTransferInstruction(
+					tokenAccountInfo.address,
+					merchantTokenAccountInfo.address,
+					solProvider.publicKey,
+					1,
+					[],
+					TOKEN_PROGRAM_ID
+                )
+            
+              const transaction = new Transaction().add(instructions);
+              transaction.feePayer = solProvider.publicKey;
+              transaction.recentBlockhash = (await solConnection.getRecentBlockhash()).blockhash;
+			  let signed = await solProvider.signTransaction(transaction);
+
+              const transactionSignature = await solConnection.sendRawTransaction(
+                signed.serialize()
+              );
+            
+              await solConnection.confirmTransaction(transactionSignature);
+			toast.dismiss(toastIdTransact)
 		}
 	}
 
