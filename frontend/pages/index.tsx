@@ -68,30 +68,30 @@ const features = [
 const blogPosts = [
   {
     id: 1,
-    title: 'Gauranteed Safety',
+    title: 'Start accepting crypto payments',
     href: '#',
     imageUrl:
       'https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'Millions of businesses of all sizes—from startups to large enterprises—use Wagpay’s software and APIs to accept payments, send payouts, and manage their businesses online.',
+      'Create simple forms',
   },
   {
     id: 2,
-    title: 'Gauranteed Safety',
+    title: 'Simple & Smoothest User Experience',
     href: '#',
     imageUrl:
       'https://images.unsplash.com/photo-1547586696-ea22b4d4235d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'Millions of businesses of all sizes—from startups to large enterprises—use Wagpay’s software and APIs to accept payments, send payouts, and manage their businesses online.',
+      'WagPay is a payment solution that makes payment acceptance easier for next chapter of internet to usher your growth. We empower merchants to accept crypto payments seamlessly with easiest integration.',
   },
   {
     id: 3,
-    title: 'Gauranteed Safety',
+    title: 'No Extra Fees',
     href: '#',
     imageUrl:
       'https://images.unsplash.com/photo-1492724441997-5dc865305da7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'Millions of businesses of all sizes—from startups to large enterprises—use Wagpay’s software and APIs to accept payments, send payouts, and manage their businesses online.',
+      'It provides deep insights, rich reporting and advanced analytics required to take your business to next level.',
   },
 ]
 
@@ -207,16 +207,14 @@ const Homepage: React.FC = () => {
                     </a>
                     <h1 className="mt-4 space-y-2 font-jakarta text-4xl font-black tracking-tight text-white sm:mt-5 sm:text-6xl lg:mt-6 xl:text-6xl">
                       <span className="block">
-                        Next generation payment gateway
+                        Powering your finances with
                       </span>
                       <span className="block bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 bg-clip-text pb-3 text-transparent sm:pb-5">
-                        for the internet
+                        next chapter of Internet.
                       </span>
                     </h1>
                     <p className="text-base text-gray-300 sm:text-xl lg:text-lg xl:text-xl">
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                      Architecto enim eos nesciunt atque ipsam nobis est?
-                      Possimus dolore sed explicabo?
+                    WagPay is a payment solution that makes payment acceptance easier for next chapter of internet to usher your growth. We empower merchants to accept crypto payments seamlessly with easiest integration.
                     </p>
                     <div className="mt-10 sm:mt-12">
                       <form
@@ -272,9 +270,7 @@ const Homepage: React.FC = () => {
                   WagPay Dashboard - Managing Payments made easy
                 </p>
                 <p className="mx-auto mt-5 max-w-prose text-xl text-gray-500">
-                  Phasellus lorem quam molestie id quisque diam aenean nulla in.
-                  Accumsan in quis quis nunc, ullamcorper malesuada. Eleifend
-                  condimentum id viverra nulla.
+                  It provides deep insights, rich reporting and advanced analytics required to take your business to next level.
                 </p>
               </div>
               <div className="mt-12 -mb-10 sm:-mb-24 lg:-mb-80">
@@ -494,12 +490,10 @@ const Homepage: React.FC = () => {
                   Learn
                 </h2>
                 <p className="mt-2 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                  How WagPay Works?
+                  Why WagPay?
                 </p>
                 <p className="mx-auto mt-5 max-w-prose text-xl text-gray-500">
-                  Phasellus lorem quam molestie id quisque diam aenean nulla in.
-                  Accumsan in quis quis nunc, ullamcorper malesuada. Eleifend
-                  condimentum id viverra nulla.
+                  WagPay is here to revolutionalize the world and remove poverty from the world with the use of crypto
                 </p>
               </div>
               <div className="mx-auto mt-12 grid max-w-md gap-8 px-4 sm:max-w-lg sm:px-6 lg:max-w-7xl lg:grid-cols-3 lg:px-8">
