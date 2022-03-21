@@ -37,8 +37,8 @@ interface Props {
 }
 
 export const getServerSideProps = async (context: any) => {
-	// try {
-		const res = await fetch(`http://localhost:3000/api/pages/${context.params.store}?username=${context.params.username}`)
+	try {
+		const res = await fetch(`https://wagpay.vercel.app/api/pages/${context.params.store}?username=${context.params.username}`)
 		console.log(`http://localhost:3000/api/pages/${context.params.store}?username=${context.params.username}`)
 		const store: Page = await res.json()
 		return {
@@ -46,14 +46,14 @@ export const getServerSideProps = async (context: any) => {
 				store: store
 			}
 		}
-	// } catch (e) {
-		// return {
-		// 	redirect: {
-		// 		permanent: false,
-		// 		destination: `/claim?username=${context.params.store}`
-		// 	}
-		// }
-	// }
+	} catch (e) {
+		return {
+			redirect: {
+				permanent: false,
+				destination: `/claim?username=${context.params.store}`
+			}
+		}
+	}
 }
 
 const Store = ({ store }: Props) => {
