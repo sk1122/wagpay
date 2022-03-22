@@ -73,7 +73,7 @@ const blogPosts = [
     imageUrl:
       'https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'Create simple forms',
+      'Create simple forms & list your ',
   },
   {
     id: 2,
@@ -82,7 +82,7 @@ const blogPosts = [
     imageUrl:
       'https://images.unsplash.com/photo-1547586696-ea22b4d4235d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'WagPay is a payment solution that makes payment acceptance easier for next chapter of internet to usher your growth. We empower merchants to accept crypto payments seamlessly with easiest integration.',
+      'WagPay has got the most simple UI/UX to start accepting payments in crypto',
   },
   {
     id: 3,
@@ -195,7 +195,7 @@ const Homepage: React.FC = () => {
                       className="inline-flex items-center rounded-full bg-black p-1 pr-2 text-white hover:text-gray-200 sm:text-base lg:text-sm xl:text-base"
                     >
                       <span className="rounded-full bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 px-3 py-0.5 text-xs font-semibold uppercase leading-5 tracking-wide text-white">
-                        Claim your Username
+                        Join our waitlist
                       </span>
                       <a href="#claim" className="ml-4 text-sm">
                         Click here
@@ -229,7 +229,7 @@ const Homepage: React.FC = () => {
                             <input
                               id="username"
                               type="text"
-                              placeholder="@username"
+                              placeholder="Email"
                               className="block w-full rounded-md border-0 px-4 py-3 text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900"
                             />
                           </div>
@@ -238,7 +238,7 @@ const Homepage: React.FC = () => {
                               type="submit"
                               className="block w-full rounded-md bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 py-3 px-6 font-medium text-white shadow hover:from-rose-500 hover:via-fuchsia-600 hover:to-indigo-600 focus:outline-none"
                             >
-                              Sign up
+                              Claim Username
                             </button>
                           </div>
                         </div>
@@ -456,18 +456,8 @@ const Homepage: React.FC = () => {
                 <div className="mx-auto max-w-md px-4 sm:max-w-2xl sm:px-6 lg:max-w-none lg:px-0 lg:py-20">
                   <blockquote>
                     <div>
-                      <svg
-                        className="h-12 w-12 text-white opacity-25"
-                        fill="currentColor"
-                        viewBox="0 0 32 32"
-                        aria-hidden="true"
-                      >
-                        <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                      </svg>
                       <p className="mt-6 text-2xl font-medium text-white">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        Sed urna nulla vitae laoreet augue. Amet feugiat est
-                        integer dolor auctor adipiscing nunc urna, sit.
+                        WagPay username is a step to create your store / pages and start accepting payments in multiple cryptocurrencies
                       </p>
                     </div>
                     <footer className="mt-6">
@@ -493,7 +483,7 @@ const Homepage: React.FC = () => {
                   Why WagPay?
                 </p>
                 <p className="mx-auto mt-5 max-w-prose text-xl text-gray-500">
-                  WagPay is here to revolutionalize the world and remove poverty from the world with the use of crypto
+                  WagPay is a simple-to-use, cool product which enables you to start accepting cryptocurrencies in no time
                 </p>
               </div>
               <div className="mx-auto mt-12 grid max-w-md gap-8 px-4 sm:max-w-lg sm:px-6 lg:max-w-7xl lg:grid-cols-3 lg:px-8">

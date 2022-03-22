@@ -52,6 +52,12 @@ const CrossIcon = () => {
 }
 
 const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, setIsModalOpen, merchantETH, merchantSOL, setQrCode, totalPrice }: Props) => {
+	const { query } = useRouter()
+	useEffect(() => {
+		console.log(query)
+		setEmail(query.email as string)
+	}, [query])
+	
 	const [{ data: connectData, error: connectError }, connect] = useConnect()
 	const [{ data: accountData }, disconnect] = useAccount({
 	  fetchEns: true,
