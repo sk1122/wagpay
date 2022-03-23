@@ -259,7 +259,7 @@ const PaymentCard = ({
       })
 
       // Update payment status
-      let paymentStatus = 'confirmed'
+      var paymentStatus = 'confirmed'
 
       /**
        * Validate transaction

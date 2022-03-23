@@ -272,11 +272,19 @@ const Store = ({ store }: Props) => {
   }
 
   useEffect(() => {
+    console.log(isModalOpen)
+    console.log(url)
     onDataChange(url)
   }, [url])
 
   return (
     <div className="w-full min-h-screen bg-gray-900 font-inter">
+      <div className={(isModalOpen ? "" : "hidden") + "w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
+        <div className={(isModalOpen ? "" : "hidden") + " absolute bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
+				  <p className='text-white'>Scan this code to pay with any solana mobile wallet</p>
+          <div ref={ref}></div>
+				</div>
+			</div>
       <main className="mx-auto max-w-2xl px-4 pt-16 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="flex justify-center items-start flex-col space-y-3">
           <h1 className="text-white font-jakarta text-3xl font-extrabold tracking-tight sm:text-4xl">
