@@ -3,10 +3,14 @@ import { PlusIcon, XIcon } from '@heroicons/react/solid'
 import { supabase } from '../../supabase'
 import toast from 'react-hot-toast'
 
+import StoreSuccess from './StoreSuccess'
+
 type supported_currencies = 'Ethereum' | 'Solana'
 
 interface Props {
   isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  username: string
 }
 
 interface Product {
@@ -45,6 +49,9 @@ const supported_currencies = ['SOL', 'ETH']
 const NewStore = (props: Props) => {
   const [products, setProducts] = useState<Product[]>([])
   const [fields, setFields] = useState<Field[]>([])
+
+  const [storeSuccess, setStoreSuccess] = useState(false)
+  const [tweet, setTweet] = useState('')
 
   const [title, setTitle] = useState('')
   const [logo, setLogo] = useState('')
@@ -103,12 +110,13 @@ const NewStore = (props: Props) => {
   }
 
   const submit = async () => {
-    if(typeof products === 'undefined' || products.length <= 0) {
+    if (typeof products === 'undefined' || products.length <= 0) {
       console.log('dsa')
+
       toast.error('Add Products')
       return
     }
-    if(typeof fields === 'undefined' || fields.length <= 0) {
+    if (typeof fields === 'undefined' || fields.length <= 0) {
       toast.error('Add Fields')
       return
     }
@@ -134,6 +142,7 @@ const NewStore = (props: Props) => {
         },
       })
     } catch (e) {
+      props.setIsOpen(false)
       toast.dismiss(toastId)
       toast.error("Can't create a store")
       return
@@ -143,6 +152,9 @@ const NewStore = (props: Props) => {
 
     toast.dismiss(toastId)
     toast.success('Successfully Created Store')
+    props.setIsOpen(false)
+    setTweet(`https://wagpay.vercel.app/${props.username}/${slug}`)
+    setStoreSuccess(true)
   }
 
   return (
@@ -163,6 +175,18 @@ const NewStore = (props: Props) => {
           className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
         />
       </div>
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="Store">Store Logo</label>
+        <div className="block h-full w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+          <input
+            type="file"
+            name="store_logo"
+            onChange={(e) => console.log(e.target.files)}
+            className="m-0 h-full w-full cursor-pointer rounded-full p-0 outline-none"
+          />
+        </div>
+      </div>
+
       <div className="flex flex-col space-y-2">
         <label htmlFor="Store">
           Store Description (What you sell? Who you are?)
@@ -305,6 +329,14 @@ const NewStore = (props: Props) => {
                   className="w-1/2 rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
                 />
               </div>
+              <div className="block h-full w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+                <input
+                  type="file"
+                  name="store_logo"
+                  onChange={(e) => console.log(e.target.files)}
+                  className="m-0 h-full w-full cursor-pointer rounded-full p-0 outline-none"
+                />
+              </div>
               <input
                 value={product.links.join()}
                 onChange={(e) => changeProduct('links', e.target.value, idx)}
@@ -354,6 +386,7 @@ const NewStore = (props: Props) => {
       >
         Submit
       </button>
+      {storeSuccess && <StoreSuccess tweet_text={tweet} />}
     </div>
   )
 }
