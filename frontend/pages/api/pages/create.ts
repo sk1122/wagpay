@@ -8,7 +8,7 @@ import connect_product_to_pages from '../utils/connect_product_to_pages'
 
 interface Page {
 	title: string
-	logo: string
+	logo: File
 	description: string
 	social_links: Object
 	accepted_currencies: string[]
@@ -18,6 +18,21 @@ interface Page {
 	sol_address?: string
 	user: number
 	products: Product[]
+}
+
+export const uploadFile = async (file: File, projectId: any) => {
+    const { data, error } = await supabase.storage
+		.from('store')
+		.upload(`${projectId}`, file, {
+			cacheControl: '3600',
+			upsert: false,
+		})
+
+	const { data: dataE, error: errorE } = await supabase.storage.listBuckets()
+	console.log(dataE, "DATAE")
+
+	if (error) console.log(error, 'Errorx')
+	console.log(data)
 }
 
 async function create(req: NextApiRequest, res: NextApiResponse<Page | string>) {
@@ -41,7 +56,8 @@ async function create(req: NextApiRequest, res: NextApiResponse<Page | string>) 
 
 	if(req.method === 'POST') {
 		const pageData = JSON.parse(req.body) as Page
-		let { products, ...page } = pageData
+		let { products, logo, ...page } = pageData
+		console.log(logo, "LOGO")
 		page.user = userData[0].id
 
 		if(!page.eth_address) page.eth_address = userData[0].eth_address
@@ -57,10 +73,12 @@ async function create(req: NextApiRequest, res: NextApiResponse<Page | string>) 
 			return
 		}
 		
-		let product_ids = await createProducts(products, userData[0].id)
+		let product_ids = await createProducts(products, userData[0].id, data[0].id)
 		let connect_product = await connect_product_to_pages(product_ids, data[0].id)
 
-		res.status(201).send(page as Page)
+		// uploadFile(logo, data[0].id)
+
+		res.status(201).send(data[0] as Page)
 	}
 }
 

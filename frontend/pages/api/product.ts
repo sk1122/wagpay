@@ -7,4 +7,5 @@ export interface Product {
 	links: string[]
 	sold: number
 	user: number
+	image: File
 }

@@ -4,6 +4,7 @@ import { supabase } from '../../supabase'
 import toast from 'react-hot-toast'
 
 import StoreSuccess from './StoreSuccess'
+import { uploadFile } from '../../pages/api/pages/create'
 
 type supported_currencies = 'Ethereum' | 'Solana'
 
@@ -19,6 +20,7 @@ interface Product {
   name: string
   description: string
   links: string[]
+  image: any
 }
 
 interface Field {
@@ -27,22 +29,8 @@ interface Field {
   value: string
 }
 
-const empty_product: Product = {
-  discounted_price: 0,
-  price: 0,
-  name: '',
-  description: '',
-  links: [],
-}
-
-const empty_field: Field = {
-  name: '',
-  type: '',
-  value: '',
-}
-
 type _fields = 'name' | 'type'
-type _products = 'discounted_price' | 'price' | 'name' | 'description' | 'links'
+type _products = 'discounted_price' | 'price' | 'name' | 'description' | 'links' | 'image'
 
 const supported_currencies = ['SOL', 'ETH']
 
@@ -54,7 +42,7 @@ const NewStore = (props: Props) => {
   const [tweet, setTweet] = useState('')
 
   const [title, setTitle] = useState('')
-  const [logo, setLogo] = useState('')
+  const [logo, setLogo] = useState<File>()
   const [description, setDescription] = useState('')
   const [socialLinks, setSocialLinks] = useState<object>({})
   const [currencies, setCurrencies] = useState<string[]>([])
@@ -62,7 +50,7 @@ const NewStore = (props: Props) => {
   const [eth, setETH] = useState<string>('')
   const [sol, setSOL] = useState<string>('')
 
-  const changeField = async (field: _fields, value: string, idx: number) => {
+  const changeField = async (field: _fields, value: any | null, idx: number) => {
     console.log(field, value, idx, fields.length)
     await setFields((previousState) => {
       let field_values = [...fields]
@@ -106,7 +94,19 @@ const NewStore = (props: Props) => {
         product_values[idx].links = String(value).split(',')
         return product_values
       })
+    } else if (field === 'image') {
+      setProducts((prevState) => {
+        let product_values = [...products]
+        product_values[idx].image = value[0] as File
+        return product_values
+      })
     }
+  }
+
+  // @ts-ignore
+  const handleImage = (file, setImg: Function) => {
+    console.log(file[0], "FILE")
+    setImg(file[0])
   }
 
   const submit = async () => {
@@ -150,12 +150,16 @@ const NewStore = (props: Props) => {
 
     const res = await data.json()
 
+    uploadFile(logo as File, `${res.id}/logo.png`)
+
     toast.dismiss(toastId)
     toast.success('Successfully Created Store')
-    props.setIsOpen(false)
+    // props.setIsOpen(false)
     setTweet(`https://wagpay.vercel.app/${props.username}/${slug}`)
     setStoreSuccess(true)
   }
+
+  useEffect(() => console.log(products), [products])
 
   return (
     <div
@@ -181,7 +185,7 @@ const NewStore = (props: Props) => {
           <input
             type="file"
             name="store_logo"
-            onChange={(e) => console.log(e.target.files)}
+            onChange={(e) => handleImage(e.target.files, setLogo)}
             className="m-0 h-full w-full cursor-pointer rounded-full p-0 outline-none"
           />
         </div>
@@ -291,7 +295,6 @@ const NewStore = (props: Props) => {
         })}
         <button
           onClick={() => {
-            console.log(fields, empty_field)
             setFields(() => [...fields, { name: '', type: '', value: '' }])
           }}
           type="button"
@@ -329,14 +332,6 @@ const NewStore = (props: Props) => {
                   className="w-1/2 rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
                 />
               </div>
-              <div className="block h-full w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-                <input
-                  type="file"
-                  name="store_logo"
-                  onChange={(e) => console.log(e.target.files)}
-                  className="m-0 h-full w-full cursor-pointer rounded-full p-0 outline-none"
-                />
-              </div>
               <input
                 value={product.links.join()}
                 onChange={(e) => changeProduct('links', e.target.value, idx)}
@@ -367,6 +362,7 @@ const NewStore = (props: Props) => {
                 name: '',
                 description: '',
                 links: [],
+                image: null
               },
             ])
           }
