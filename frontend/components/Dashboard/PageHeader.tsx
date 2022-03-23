@@ -112,7 +112,11 @@ const PageHeader = ({ user }: Props) => {
           onClick={() => setIsOpen(false)}
           className="absolute top-10 right-1/3 h-10 w-10 -translate-x-1/2 -translate-y-1/2 transform cursor-pointer"
         />
-        <NewStore isOpen={isOpen} />
+        <NewStore
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          username={user.username}
+        />
       </div>
     </div>
   )
