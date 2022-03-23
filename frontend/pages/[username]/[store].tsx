@@ -17,10 +17,8 @@ import QRCodeStyling, {
 } from 'qr-code-styling'
 
 import {
-  CheckIcon,
-  ClockIcon,
-  QuestionMarkCircleIcon,
-  XIcon as XIconSolid,
+  PlusIcon,
+  MinusIcon
 } from '@heroicons/react/solid'
 
 interface Page {
@@ -43,23 +41,6 @@ interface Props {
   store: Page
 }
 
-const products = [
-  {
-    id: 1,
-    name: 'Ray96',
-    href: '#',
-    price: '$32.00',
-    inStock: true,
-  },
-
-  {
-    id: 2,
-    name: 'Ray69',
-    href: '#',
-    price: '$32.00',
-    inStock: true,
-  },
-]
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
@@ -295,11 +276,14 @@ const Store = ({ store }: Props) => {
   }, [url])
 
   return (
-    <div className="bg-gray-900">
+    <div className="w-full min-h-screen bg-gray-900 font-inter">
       <main className="mx-auto max-w-2xl px-4 pt-16 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-100 sm:text-4xl">
-          Store
-        </h1>
+        <div className="flex justify-center items-start flex-col space-y-3">
+          <h1 className="text-white font-jakarta text-3xl font-extrabold tracking-tight sm:text-4xl">
+            {store.title}
+          </h1>
+          <p className='text-white'>{store.description}</p>
+        </div>
 
         <form className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16">
           <section aria-labelledby="cart-heading" className="lg:col-span-7">
@@ -307,61 +291,8 @@ const Store = ({ store }: Props) => {
               role="list"
               className="divide-y divide-gray-200 border-t border-b border-gray-200"
             >
-              {products.map((product, productIdx) => (
-                <li key={product.id} className="flex py-6 sm:py-10">
-                  <div className="flex-shrink-0"></div>
-
-                  <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
-                    <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
-                      <div>
-                        <div className="flex justify-between">
-                          <h3 className="text-sm">
-                            <a
-                              href={product.href}
-                              className="font-medium text-gray-200 hover:text-gray-800"
-                            >
-                              {product.name}
-                            </a>
-                          </h3>
-                        </div>
-                        <p className="mt-1 text-sm font-medium text-gray-100">
-                          {product.price}
-                        </p>
-                      </div>
-
-                      <div className="mt-4 sm:mt-0 sm:pr-9">
-                        <div className="absolute top-0 right-0">
-                          <button
-                            type="button"
-                            className="-m-2 inline-flex p-2 text-gray-400 hover:text-gray-500"
-                          >
-                            <span className="sr-only">Remove</span>
-                            <XIconSolid
-                              className="h-5 w-5"
-                              aria-hidden="true"
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="mt-4 flex space-x-2 text-sm text-gray-200">
-                      {product.inStock ? (
-                        <CheckIcon
-                          className="h-5 w-5 flex-shrink-0 text-green-500"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <ClockIcon
-                          className="h-5 w-5 flex-shrink-0 text-gray-300"
-                          aria-hidden="true"
-                        />
-                      )}
-
-                      <span>Product Description</span>
-                    </p>
-                  </div>
-                </li>
+              {store && store.products.map((product, productIdx) => (
+                <Product product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
               ))}
             </ul>
           </section>
