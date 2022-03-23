@@ -262,7 +262,7 @@ const Store = ({ store }: Props) => {
 				</p>
 			</div>
 			<div className="w-1/2 h-full flex justify-center items-center">
-				<PaymentCard setURL={setUrl} updateTransaction={updateTransaction} createTransaction={createTransaction} storeId={store.id} fields={store.fields} totalPrice={totalPrice} merchantETH={store.eth_address as string} merchantSOL={store.sol_address as string} setIsModalOpen={setIsModalOpen} setQrCode={setQrCode} />
+				<PaymentCard accepted_currencies={store.accepted_currencies} setURL={setUrl} updateTransaction={updateTransaction} createTransaction={createTransaction} storeId={store.id} fields={store.fields} totalPrice={totalPrice} merchantETH={store.eth_address as string} merchantSOL={store.sol_address as string} setIsModalOpen={setIsModalOpen} setQrCode={setQrCode} />
 			</div>
 			<div className={(isModalOpen ? "" : "hidden") + " w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
 				<div className={(isModalOpen ? "" : "hidden") + " absolute fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
