@@ -85,7 +85,7 @@ const Store = ({ store }: Props) => {
   useEffect(() => {
     if (query.products) {
       const products = query.products as string[]
-      ;(async () => {
+      (async () => {
         let ids: ProductInterface[] = []
         const promise = await products.map(async (v) => {
           let data = await fetch(`https://wagpay.vercel.app/api/products/${v}`)
@@ -293,7 +293,7 @@ const Store = ({ store }: Props) => {
           <p className='text-white'>{store.description}</p>
         </div>
 
-        <form className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16">
+        <div className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16">
           <section aria-labelledby="cart-heading" className="lg:col-span-7">
             <ul
               role="list"
@@ -311,6 +311,7 @@ const Store = ({ store }: Props) => {
             className="mt-16 rounded-lg  lg:col-span-5 lg:mt-0"
           >
             <PaymentCard
+              accepted_currencies={store.accepted_currencies}
               setURL={setUrl}
               updateTransaction={updateTransaction}
               createTransaction={createTransaction}
@@ -323,7 +324,7 @@ const Store = ({ store }: Props) => {
               setQrCode={setQrCode}
             />
           </section>
-        </form>
+        </div>
       </main>
     </div>
   )

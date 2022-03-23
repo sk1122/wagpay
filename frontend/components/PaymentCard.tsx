@@ -38,33 +38,30 @@ import { Switch } from '@headlessui/react'
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
-type supported_currencies =
-  | 'Ethereum'
-  | 'Solana'
-  | 'USDC (Ethereum)'
-  | 'USDC (Solana)'
-
-function classNames(...classes: any) {
-  return classes.filter(Boolean).join(' ')
-}
+type supported_currencies = 'ETH' | 'SOL' | 'USDC (Ethereum)' | 'USDC (Solana)'
 
 const currencies = [
-  {
-    Ethereum: {
-      wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet'],
-    },
-    'USDC (Ethereum)': {
-      wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet'],
-    },
-    Solana: {
-      wallets: ['Phantom'],
-    },
-    'USDC (Solana)': {
-      wallets: ['Phantom'],
-    },
-  },
+	{
+		symbol: 'ETH',
+		name: 'Ethereum',
+		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
+	},
+	{
+		symbol: 'USDC (ETH)',
+		name: 'USDC (Ethereum)',
+		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
+	},
+	{
+		symbol: 'SOL',
+		name: 'Solana',
+		wallets: ['Phantom']
+	},
+	{
+		symbol: 'USDC (SOL)',
+		name: 'USDC (Solana)',
+		wallets: ['Phantom']
+	}
 ]
-
 interface Props {
   setIsModalOpen: Function
   setQrCode: Function
@@ -76,6 +73,7 @@ interface Props {
   createTransaction: Function
   updateTransaction: Function
   setURL: Function
+  accepted_currencies: any
 }
 
 const CrossIcon = () => {
@@ -98,6 +96,7 @@ const CrossIcon = () => {
 }
 
 const PaymentCard = ({
+  accepted_currencies,
   setURL,
   fields,
   createTransaction,
@@ -108,6 +107,14 @@ const PaymentCard = ({
   setQrCode,
   totalPrice,
 }: Props) => {
+  const { query } = useRouter()
+	useEffect(() => {
+		if(query && query.email) {
+      console.log(query)
+      setEmail(query.email as string)
+    }
+	}, [])
+
   const [{ data: connectData, error: connectError }, connect] = useConnect()
   const [{ data: accountData }, disconnect] = useAccount({
     fetchEns: true,
@@ -152,7 +159,7 @@ const PaymentCard = ({
   const [email, setEmail] = useState('')
   const [eth, setETH] = useState('')
   const [sol, setSOL] = useState('')
-  const [option, setOption] = useState<supported_currencies>('Ethereum')
+  const [option, setOption] = useState<supported_currencies>('ETH')
   const [wallet, setWallet] = useState('Metamask')
   const [price, setPrice] = useState(0)
   const [fieldValues, setFieldValues] = useState<any[]>(fields)
@@ -318,6 +325,7 @@ const PaymentCard = ({
   }
 
   const pay = async () => {
+    // e.preventDefault()
     if (!email || !checkIfAllFilled()) {
       toast.error('Fill all Fields')
       return
@@ -328,7 +336,7 @@ const PaymentCard = ({
       return
     }
 
-    if (option.toLowerCase() === 'solana') {
+    if (option.toLowerCase() === 'sol') {
       var toastIdTransact
       try {
         const toastIdConnect = toast.loading('Connecting Solana Wallet')
@@ -385,7 +393,7 @@ const PaymentCard = ({
         toast.dismiss(toastIdTransact)
         toast.error('Transaction not successful')
       }
-    } else if (option.toLowerCase() === 'ethereum') {
+    } else if (option.toLowerCase() === 'eth') {
       var toastTransact, toastConnect
 
       toastConnect = toast.loading('Connecting Ethereum Wallet')
@@ -695,9 +703,7 @@ const PaymentCard = ({
             </h2>
           </div>
           <div className="mt-12">
-            <form
-              action="#"
-              method="POST"
+            <div
               className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8"
             >
               <div className="sm:col-span-2">
@@ -749,8 +755,9 @@ const PaymentCard = ({
                     setOption(e.target.value as supported_currencies)
                   }
                 >
-                  {Object.keys(currencies[0]).map((currency) => {
-                    return <option value={currency}>{currency}</option>
+                  {currencies.map(currency => {
+                    if(!accepted_currencies.includes(currency.symbol)) return <div></div>
+                    return <option value={currency.symbol}>{currency.name}</option>	
                   })}
                 </select>
               </div>
@@ -762,11 +769,9 @@ const PaymentCard = ({
                     setWallet(e.target.value as supported_currencies)
                   }
                 >
-                  {currencies[0][option as supported_currencies].wallets.map(
-                    (value) => {
-                      return <option value={value}>{value}</option>
-                    }
-                  )}
+                  {currencies.find(currency => currency.symbol === option as supported_currencies)?.wallets.map(value => {
+                    return <option value={value}>{value}</option>
+                  })}
                 </select>
               </div>
               {/* ------------------------------- */}
@@ -802,14 +807,13 @@ const PaymentCard = ({
 
               <div className="sm:col-span-2">
                 <button
-                  type="submit"
                   onClick={pay}
                   className="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Pay
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
