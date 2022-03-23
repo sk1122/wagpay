@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  username    String?
+  eth_address String?
+  sol_address String?
+  is_paid     Boolean?
+  created_at  DateTime  @default(now())
+  email       String?
+  Pages       Pages[]
+  Product     Product[]
+}
+
+model Product {
+  id               Int          @id @default(autoincrement())
+  discounted_price Float
+  userId           Int
+  name             String
+  description      String?
+  links            String[]
+  sold             Int          @default(0)
+  created_at       DateTime     @default(now())
+  price            Float
+  user             User         @relation(fields: [userId], references: [id])
+  Submission       Submission[]
+}
+
+model Pages {
+  id                  Int          @id @default(autoincrement())
+  fields              Json[]
+  created_at          DateTime     @default(now())
+  title               String
+  logo                String?
+  description         String?
+  social_links        Json?
+  accepted_currencies String[]
+  terms_conditions    String[]
+  slug                String
+  eth_address         String?
+  sol_address         String?
+  userId              Int
+  visits              Int
+  user                User         @relation(fields: [userId], references: [id])
+  Submission          Submission[]
+}
+
+model Submission {
+  id               Int      @id @default(autoincrement())
+  created_at       DateTime @default(now())
+  name             String?
+  fields           Json[]
+  contact_number   String?
+  email            String?
+  eth_address      String?
+  sol_address      String?
+  pagesId          Int
+  productId        Int
+  transaction_hash String?
+  page             Pages    @relation(fields: [pagesId], references: [id])
+  products         Product  @relation(fields: [productId], references: [id])
+}
