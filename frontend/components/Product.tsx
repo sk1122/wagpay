@@ -20,8 +20,10 @@ const Product = (props: Props) => {
 				return ps + 1
 			})
 		} else {
-			console.log('2')
-			console.log(1)
+			if(noProducts == 0) {
+				return
+			}
+
 			props.remove([props.product])
 			setNoProducts((ps) => {
 				return ps - 1

@@ -69,7 +69,7 @@ const Transactions = ({ cards }: Props) => {
       var total_price = 0
       for (let i = 0; i < products.length; i++) {
         const ress = await fetch(
-          `https://wagpay.vercel.app/api/products/${products[i]}`
+          `/api/products/${products[i]}`
         )
         const res = await ress.json()
 
@@ -78,7 +78,7 @@ const Transactions = ({ cards }: Props) => {
       }
 
       const ress = await fetch(
-        `https://wagpay.vercel.app/api/pages/id?id=${data[j].page_id}`
+        `/api/pages/id?id=${data[j].page_id}`
       )
       const res = await ress.json()
       data[j].page_id = res

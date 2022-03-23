@@ -15,22 +15,28 @@ import Authereum from "authereum";
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
-type supported_currencies = 'Ethereum' | 'Solana' | 'USDC (Ethereum)' | 'USDC (Solana)'
+type supported_currencies = 'ETH' | 'SOL' | 'USDC (Ethereum)' | 'USDC (Solana)'
 
 const currencies = [
 	{
-		'Ethereum': {
-			wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
-		},
-		'USDC (Ethereum)': {
-			wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
-		},
-		'Solana': {
-			wallets: ['Phantom']
-		},
-		'USDC (Solana)': {
-			wallets: ['Phantom']
-		}
+		symbol: 'ETH',
+		name: 'Ethereum',
+		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
+	},
+	{
+		symbol: 'USDC (ETH)',
+		name: 'USDC (Ethereum)',
+		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
+	},
+	{
+		symbol: 'SOL',
+		name: 'Solana',
+		wallets: ['Phantom']
+	},
+	{
+		symbol: 'USDC (SOL)',
+		name: 'USDC (Solana)',
+		wallets: ['Phantom']
 	}
 ]
 
@@ -45,13 +51,14 @@ interface Props {
 	createTransaction: Function
 	updateTransaction: Function
 	setURL: Function
+	accepted_currencies: string[]
 }
 
 const CrossIcon = () => {
 	return <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
 }
 
-const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, setIsModalOpen, merchantETH, merchantSOL, setQrCode, totalPrice }: Props) => {
+const PaymentCard = ({ accepted_currencies, setURL, fields, createTransaction, updateTransaction, setIsModalOpen, merchantETH, merchantSOL, setQrCode, totalPrice }: Props) => {
 	const { query } = useRouter()
 	useEffect(() => {
 		console.log(query)
@@ -102,7 +109,7 @@ const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, set
 	const [email, setEmail] = useState('')
 	const [eth, setETH] = useState('')
 	const [sol, setSOL] = useState('')
-	const [option, setOption] = useState<supported_currencies>('Ethereum')
+	const [option, setOption] = useState<supported_currencies>('ETH')
 	const [wallet, setWallet] = useState('Metamask')
 	const [price, setPrice] = useState(0)
 	const [fieldValues, setFieldValues] = useState<any[]>(fields)
@@ -472,11 +479,11 @@ const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, set
 
 	return (
 		<div className='w-full lg:w-1/2 h-full font-urban flex flex-col justify-center items-center lg:items-end space-y-10'>
-			<div className="font-urban shadow-xl relative w-[300px] xl:w-[449px] h-[545px] rounded-xl mt-10 flex flex-col justify-center items-center overflow-hidden">
+			<div className="font-urban shadow-xl relative w-[300px] xl:w-[449px] h-[545px] bg-gray-400 rounded-xl mt-10 flex flex-col justify-center items-center overflow-hidden">
 				<div className="-z-50 select-none blur-3xl w-96 h-96 -top-20 -left-36 absolute bg-[#FFA8D5]/50 rounded-full"></div>
 				<div className="-z-50 select-none blur-3xl w-96 h-96 -bottom-20 -right-36 absolute bg-[#6C7EE1]/50 rounded-full"></div>
 				<div className='w-full h-full p-5 flex flex-col justify-center items-center space-y-5'>
-					<h1 className='text-2xl font-bold'>WagPay</h1>
+					<h1 className='font-jakarta text-2xl font-bold bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 bg-clip-text'>WagPay</h1>
 					<div className="bg-white opacity-80 flex justify-between w-full  rounded-xl">
 						<input value={email} onChange={(e) => setEmail(e.target.value)}  type='email' placeholder="Email" className="font-semibold rounded-xl w-full pl-4 py-4 opacity-80 border-0 outline-none text-sm" required />
 					</div>
@@ -503,8 +510,9 @@ const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, set
 							aria-label="Default select example"
 							onChange={(e) => setOption(e.target.value as supported_currencies)}
 							>
-							{Object.keys(currencies[0]).map(currency => {
-								return <option value={currency}>{currency}</option>	
+							{currencies.map(currency => {
+								if(!accepted_currencies.includes(currency.symbol)) return <div></div>
+								return <option value={currency.symbol}>{currency.name}</option>	
 							})}
 						</select>
 						
@@ -525,7 +533,7 @@ const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, set
 							aria-label="Default select example"
 							onChange={(e) => setWallet(e.target.value as supported_currencies)}
 							>
-							{currencies[0][option as supported_currencies].wallets.map(value => {
+							{currencies.find(currency => currency.symbol === option as supported_currencies)?.wallets.map(value => {
 								return <option value={value}>{value}</option>
 							})}
 						</select>
@@ -533,9 +541,9 @@ const PaymentCard = ({ setURL, fields, createTransaction, updateTransaction, set
 					<div className="w-full flex justify-between items-center">
 						<div className="flex justify-center items-center space-x-2">
 							<p>${totalPrice}</p>
-							<p>~{price.toFixed(2)} {option.toLowerCase() === 'ethereum' ? 'ETH' : (option.toLowerCase() === 'solana' ? 'SOL' : 'USDC')}</p>
+							<p>~{price.toFixed(2)} {option.toLowerCase() === 'eth' ? 'ETH' : (option.toLowerCase() === 'sol' ? 'SOL' : 'USDC')}</p>
 						</div>
-						{option.toLowerCase() === 'solana' && 
+						{option.toLowerCase() === 'sol' && 
 							<div onClick={() => qrCode()} className="w-10 h-10 rounded-xl cursor-pointer">
 								<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png" alt="" className="w-full h-full" />
 							</div>

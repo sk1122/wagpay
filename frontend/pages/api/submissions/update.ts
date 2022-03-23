@@ -27,7 +27,7 @@ async function create(req: NextApiRequest, res: NextApiResponse<any>) {
 
 		if(submissionData.transaction_hash) {
 			sub_data[0].products.map((value: any) => {
-				fetch('https://wagpay.vercel.app/api/products/increment_sold', {
+				fetch('/api/products/increment_sold', {
 					method: 'POST',
 					body: JSON.stringify({
 						product_id: value

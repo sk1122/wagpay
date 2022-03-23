@@ -68,21 +68,31 @@ const features = [
 const blogPosts = [
   {
     id: 1,
-    title: 'Start accepting crypto payments',
+    title: 'Become Crypto First business',
     href: '#',
     imageUrl:
       'https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'Create simple forms & list your ',
+      `Start accepting crypto payments 
+      via wagPay, with few simple clicks,
+      It is as easy as filling up a 
+      Google Form. 
+      (Try it Now)
+      `,
   },
   {
     id: 2,
-    title: 'Simple & Smoothest User Experience',
+    title: 'Best in class experience',
     href: '#',
     imageUrl:
       'https://images.unsplash.com/photo-1547586696-ea22b4d4235d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'WagPay has got the most simple UI/UX to start accepting payments in crypto',
+      `We at wagPay take our users seriously just like
+      Our product. With easy and simple to use products
+      We make your crypto payments as frictionless as 
+      Possible.
+      (Try it now)
+      `,
   },
   {
     id: 3,
@@ -91,7 +101,15 @@ const blogPosts = [
     imageUrl:
       'https://images.unsplash.com/photo-1492724441997-5dc865305da7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80',
     preview:
-      'It provides deep insights, rich reporting and advanced analytics required to take your business to next level.',
+      `
+      You read it right, we want you to focus 
+      On your product, we take care of the rest.
+      With no extra fees for payments, you can 
+      Scale at blazing fast speed. With deep 
+      Insights, rich reporting and advanced 
+      Analytics, we take your business to next level.
+
+      `,
   },
 ]
 
@@ -273,10 +291,10 @@ const Homepage: React.FC = () => {
                   It provides deep insights, rich reporting and advanced analytics required to take your business to next level.
                 </p>
               </div>
-              <div className="mt-12 -mb-10 sm:-mb-24 lg:-mb-80">
+              <div className="mt-12 -mb-10 sm:-mb-24 lg:-mb-64">
                 <img
-                  className="rounded-lg shadow-xl ring-1 ring-black ring-opacity-5"
-                  src={'/images/temp.jpg'}
+                  className="w-fit h-fit rounded-lg"
+                  src={'/dashboard.png'}
                   alt=""
                 />
               </div>
@@ -483,7 +501,7 @@ const Homepage: React.FC = () => {
                   Why WagPay?
                 </p>
                 <p className="mx-auto mt-5 max-w-prose text-xl text-gray-500">
-                  WagPay is a simple-to-use, cool product which enables you to start accepting cryptocurrencies in no time
+                  WagPay is a simple-to-use, smart product which enables you to start accepting crypto payments in no time.
                 </p>
               </div>
               <div className="mx-auto mt-12 grid max-w-md gap-8 px-4 sm:max-w-lg sm:px-6 lg:max-w-7xl lg:grid-cols-3 lg:px-8">

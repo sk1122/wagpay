@@ -37,8 +37,8 @@ interface Props {
 }
 
 export const getServerSideProps = async (context: any) => {
-	try {
-		const res = await fetch(`https://wagpay.vercel.app/api/pages/${context.params.store}?username=${context.params.username}`)
+	// try {
+		const res = await fetch(`http://localhost:3000/api/pages/${context.params.store}?username=${context.params.username}`)
 		console.log(`http://localhost:3000/api/pages/${context.params.store}?username=${context.params.username}`)
 		const store: Page = await res.json()
 		return {
@@ -46,14 +46,14 @@ export const getServerSideProps = async (context: any) => {
 				store: store
 			}
 		}
-	} catch (e) {
-		return {
-			redirect: {
-				permanent: false,
-				destination: `/claim?username=${context.params.store}`
-			}
-		}
-	}
+	// } catch (e) {
+	// 	return {
+	// 		redirect: {
+	// 			permanent: false,
+	// 			destination: `/claim?username=${context.params.store}`
+	// 		}
+	// 	}
+	// }
 }
 
 const Store = ({ store }: Props) => {
@@ -61,7 +61,7 @@ const Store = ({ store }: Props) => {
 
 	const updateVisit = async () => {
 		console.log(store.id)
-		let data = await fetch(`https://wagpay.vercel.app/api/pages/updateVisits?id=${store.id}`, {
+		let data = await fetch(`/api/pages/updateVisits?id=${store.id}`, {
 			method: 'PATCH'
 		})
 	}
@@ -76,7 +76,7 @@ const Store = ({ store }: Props) => {
 			(async () => {
 				let ids: ProductInterface[] = []
 				const promise = await products.map(async (v) => {
-					let data = await fetch(`https://wagpay.vercel.app/api/products/${v}`)
+					let data = await fetch(`/api/products/${v}`)
 					let product = await data.json() as ProductInterface
 					console.log(product)
 					ids.push(product)
@@ -249,9 +249,9 @@ const Store = ({ store }: Props) => {
 	}, [url])
 
 	return (
-		<div className="relative bg-[#6C7EE1]/20 w-full min-h-screen flex justify-start items-center font-urban">
+		<div className="relative bg-gray-900 w-full min-h-screen flex justify-start items-center font-inter text-white">
 			<div className="w-1/2 h-full flex flex-col justify-center items-start pl-24 space-y-5">
-				<h1 className="text-4xl font-black">{store.title}</h1>
+				<h1 className="font-jakarta text-4xl font-black">{store.title}</h1>
 				<div className="w-full h-full flex flex-col justify-center items-start space-y-4">
 					{store.products.map(value => {
 						return <Product add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} product={value} />
@@ -262,7 +262,7 @@ const Store = ({ store }: Props) => {
 				</p>
 			</div>
 			<div className="w-1/2 h-full flex justify-center items-center">
-				<PaymentCard setURL={setUrl} updateTransaction={updateTransaction} createTransaction={createTransaction} storeId={store.id} fields={store.fields} totalPrice={totalPrice} merchantETH={store.eth_address as string} merchantSOL={store.sol_address as string} setIsModalOpen={setIsModalOpen} setQrCode={setQrCode} />
+				<PaymentCard accepted_currencies={store.accepted_currencies} setURL={setUrl} updateTransaction={updateTransaction} createTransaction={createTransaction} storeId={store.id} fields={store.fields} totalPrice={totalPrice} merchantETH={store.eth_address as string} merchantSOL={store.sol_address as string} setIsModalOpen={setIsModalOpen} setQrCode={setQrCode} />
 			</div>
 			<div className={(isModalOpen ? "" : "hidden") + " w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
 				<div className={(isModalOpen ? "" : "hidden") + " absolute fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
