@@ -1,24 +1,26 @@
-import { NextFunction, Request, Response } from "express";
-import { verify } from 'web3-token';
+import type { NextFunction, Request, Response } from 'express'
 import { supabase } from "../client";
-import { definitions } from "../types";
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import { ResponseType } from '../types/ErrorType';
 
-export const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
-	let signed_msg = req.headers['signed_msg']
-	let { address, body } = await verify(signed_msg as string)
-	console.log(address)
+const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+	var decoded: JwtPayload | string = ''
+	try {
+		const JWT_SECRET = '1733729e-3910-4637-88c1-6fad57d04f26'
+		const access_token = req.headers['bearer-token'] as string
+		decoded = jwt.verify(access_token, JWT_SECRET);
+	} catch (e) {
+		let error: ResponseType = {
+			error: e,
+			status: 401
+		}
 
-	const { data, error } = await supabase
-		.from('User')
-		.select('*')
-		.eq('eth_address', address)
-
-	if(error || data?.length === 0) {
-		res.status(400).send('User not found:(')
-		return
+		res.status(401).send(error)
 	}
 
-	res.locals.user = data
-	
+	res.locals.user = decoded.sub
+
 	next()
 }
+
+export default verifyUser
