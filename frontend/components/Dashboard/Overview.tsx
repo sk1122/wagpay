@@ -146,7 +146,7 @@ const Overview = ({ cards }: Props) => {
       }
 
       const ress = await fetch(
-        `https://wagpay.vercel.app/api/pages/id?id=${data[j].page_id}`
+        `https://wagpay.xyz/api/pages/id?id=${data[j].page_id}`
       )
       const res = await ress.json()
       data[j].page_id = res

@@ -1,4 +1,5 @@
 // claim imports
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useConnect, useAccount } from 'wagmi'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
@@ -7,6 +8,9 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import 'react-toastify/dist/ReactToastify.css'
 import { ToastContainer, toast } from 'react-toastify'
 import { useSignMessage } from 'wagmi'
+import Web3Modal from 'web3modal'
+import WalletConnectProvider from '@walletconnect/web3-provider'
+import Authereum from 'authereum'
 // claim imports end
 
 import {
@@ -25,6 +29,8 @@ import { supabase } from '../supabase'
 
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar/Navbar'
+
+const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
 const features = [
   {
@@ -123,6 +129,32 @@ const Homepage: React.FC = () => {
     message: 'gm! \n\n Join WagPay Waitlist!',
   })
 
+  const connectETH = async () => {
+    const providerOptions = {
+      walletconnect: {
+        package: WalletConnectProvider, // required
+        options: {
+          infuraId: INFURA_ID, // required
+        },
+      },
+      authereum: {
+        package: Authereum, // required
+      },
+    }
+
+    const web3modal = new Web3Modal({
+      providerOptions,
+    })
+
+    try {
+      const provider = await web3modal.connect()
+      console.log(provider, 'PROVIDER')
+      return provider
+    } catch (e) {
+      throw e
+    }
+  }
+
   const connectSOL = async () => {
     try {
       await window.solana.connect()
@@ -213,11 +245,13 @@ const Homepage: React.FC = () => {
                       className="inline-flex items-center rounded-full bg-black p-1 pr-2 text-white hover:text-gray-200 sm:text-base lg:text-sm xl:text-base"
                     >
                       <span className="rounded-full bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 px-3 py-0.5 text-xs font-semibold uppercase leading-5 tracking-wide text-white">
-                        Join our waitlist
+                        Checkout our demo page
                       </span>
-                      <a href="#claim" className="ml-4 text-sm">
-                        Click here
-                      </a>
+                      <Link href="/cosmix/strings/">
+                        <a className="ml-4 text-sm">
+                          Click here
+                        </a>
+                      </Link>
                       <ChevronRightIcon
                         className="ml-2 h-5 w-5 text-gray-500"
                         aria-hidden="true"
@@ -346,7 +380,7 @@ const Homepage: React.FC = () => {
           {/* Testimonial section */}
           <div
             id="claim"
-            className="bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 pb-16 lg:relative lg:z-10 lg:pb-0"
+            className=" bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 pb-16 lg:relative lg:pb-0"
           >
             <div className="lg:mx-auto lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-8 lg:px-8">
               <div className="relative lg:-my-8">
@@ -386,7 +420,7 @@ const Homepage: React.FC = () => {
                         {eth === '' ? (
                           <button
                             className="border-3 flex w-full items-center justify-between rounded-xl border border-white p-3  font-semibold"
-                            onClick={() => setIsOpen(true)}
+                            onClick={() => connectETH()}
                           >
                             <span>Connect Ethereum Wallet</span>
                             <img src="/eth.png" alt="" className="items-end" />
@@ -396,56 +430,6 @@ const Homepage: React.FC = () => {
                             {eth}
                           </p>
                         )}
-                        <div
-                          className={
-                            (isOpen ? '' : 'hidden') +
-                            ' fixed top-1/2 left-1/2 z-50 flex h-1/2 w-1/3 -translate-x-1/2 -translate-y-1/2 transform flex-col items-center justify-center space-y-5 rounded-xl bg-white text-white transition-opacity duration-1000 ease-out'
-                          }
-                        >
-                          <button
-                            className="absolute top-5 right-5 text-black"
-                            onClick={() => setIsOpen(false)}
-                          >
-                            X
-                          </button>
-                          <h2 className="text-2xl font-bold text-black">
-                            Connect Your Wallet
-                          </h2>
-                          <div>
-                            {connectData.connectors.map((connector) => (
-                              <button
-                                key={connector.id}
-                                onClick={async () => {
-                                  await connect(connector)
-                                  console.log(accountData)
-                                  setETH(accountData?.address as string)
-                                }}
-                                className="m-3 flex w-64 items-center justify-center space-x-3 rounded-xl bg-black p-3"
-                              >
-                                {connector.name.toLowerCase() ===
-                                  'metamask' && (
-                                  <img
-                                    className="w-10"
-                                    src="/MetaMask_Fox.svg"
-                                  />
-                                )}
-                                {connector.name.toLowerCase() ===
-                                  'walletconnect' && (
-                                  <img
-                                    className="w-10"
-                                    src="/walletconnect-circle-blue.svg"
-                                  />
-                                )}
-                                {connector.name.toLowerCase() ===
-                                  'coinbase wallet' && (
-                                  <img className="w-10" src="/coinbase.png" />
-                                )}
-                                <span>{connector.name}</span>
-                                {!connector.ready && ' (unsupported)'}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
                         {sol === '' ? (
                           <button
                             onClick={async () => connectSOL()}
@@ -557,15 +541,14 @@ const Homepage: React.FC = () => {
                   We’re here to help
                 </p>
                 <p className="mt-3 text-lg text-gray-300">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Et,
-                  egestas tempus tellus etiam sed. Quam a scelerisque amet
-                  ullamcorper eu enim et fermentum, augue. Aliquet amet volutpat
-                  quisque ut interdum tincidunt duis.
+                  We are on mission to solve every problem related to web3 payment infrastructure 
+                  if you want to get on call and help us solve problems .
+                  do get in touch
                 </p>
                 <div className="mt-8">
                   <div className="inline-flex rounded-md shadow">
                     <a
-                      href="#"
+                      href="https://discord.gg/RjPGhpxs"
                       className="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-5 py-3 text-base font-medium text-gray-900 hover:bg-gray-50"
                     >
                       Get Help

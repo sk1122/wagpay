@@ -47,14 +47,15 @@ const Navbar = () => {
             </div>
           </div>
           <div className="hidden md:flex md:items-center md:space-x-6">
+            <Link href='/auth'>
+              <a
+                className="text-base font-medium text-white hover:text-gray-300"
+              >
+                Log in
+              </a>
+            </Link>
             <a
-              href="#"
-              className="text-base font-medium text-white hover:text-gray-300"
-            >
-              Log in
-            </a>
-            <a
-              href="#"
+              href="#claim"
               className="inline-flex items-center rounded-md border border-transparent bg-gray-600 px-4 py-2 text-base font-medium text-white hover:bg-gray-700"
             >
               Sign up
@@ -111,9 +112,11 @@ const Navbar = () => {
               <div className="mt-6 px-5">
                 <p className="text-center text-base font-medium text-gray-500">
                   Existing customer?{' '}
-                  <a href="#" className="text-gray-900 hover:underline">
-                    Login
-                  </a>
+                  <Link href="/auth">
+                    <a className="text-gray-900 hover:underline">
+                      Login
+                    </a>
+                  </Link>
                 </p>
               </div>
             </div>

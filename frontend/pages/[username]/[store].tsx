@@ -44,10 +44,10 @@ interface Props {
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
-      `https://wagpay.vercel.app/api/pages/${context.params.store}?username=${context.params.username}`
+      `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
     )
     console.log(
-      `https://wagpay.vercel.app/api/pages/${context.params.store}?username=${context.params.username}`
+      `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
     )
     const store: Page = await res.json()
     return {
@@ -71,7 +71,7 @@ const Store = ({ store }: Props) => {
   const updateVisit = async () => {
     console.log(store.id)
     let data = await fetch(
-      `https://wagpay.vercel.app/api/pages/updateVisits?id=${store.id}`,
+      `https://wagpay.xyz/api/pages/updateVisits?id=${store.id}`,
       {
         method: 'PATCH',
       }
@@ -88,7 +88,7 @@ const Store = ({ store }: Props) => {
       (async () => {
         let ids: ProductInterface[] = []
         const promise = await products.map(async (v) => {
-          let data = await fetch(`https://wagpay.vercel.app/api/products/${v}`)
+          let data = await fetch(`https://wagpay.xyz/api/products/${v}`)
           let product = (await data.json()) as ProductInterface
           console.log(product)
           ids.push(product)

@@ -155,7 +155,7 @@ const NewStore = (props: Props) => {
     toast.dismiss(toastId)
     toast.success('Successfully Created Store')
     // props.setIsOpen(false)
-    setTweet(`https://wagpay.vercel.app/${props.username}/${slug}`)
+    setTweet(`https://wagpay.xyz/${props.username}/${slug}`)
     setStoreSuccess(true)
   }
 
@@ -165,7 +165,7 @@ const NewStore = (props: Props) => {
     <div
       className={
         (props.isOpen ? '' : 'hidden ') +
-        'absolute top-0 right-0 z-50 h-screen w-1/3 space-y-5 overflow-y-scroll bg-indigo-500 px-16 pt-10 text-white'
+        'absolute top-0 right-0 z-50 h-screen w-11/12 lg:w-1/3 space-y-5 overflow-y-scroll bg-indigo-500 px-16 pt-10 text-white'
       }
     >
       <h1 className="text-3xl font-black">Create a New Store</h1>

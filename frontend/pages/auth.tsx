@@ -34,7 +34,7 @@ const Auth: React.FC = () => {
 	}
 
 	return (
-	  <div className="border rounded-lg p-12 w-4/12 mx-auto my-48">
+	  <div className="border rounded-lg p-12 w-11/12 lg:w-4/12 mx-auto my-48">
 		<h3 className="font-extrabold text-3xl">Ahoy!</h3>
   
 		<p className="text-gray-500 text-sm mt-4">
