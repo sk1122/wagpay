@@ -7,8 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CURRENCY {
+  solana
+  ethereum
+  usdcsol
+  usdceth
+}
+
 model User {
-  id          Int       @id @default(autoincrement())
+  id          String    @id @default(uuid())
   username    String?
   eth_address String?
   sol_address String?
@@ -22,13 +29,14 @@ model User {
 model Product {
   id               Int          @id @default(autoincrement())
   discounted_price Float
-  userId           Int
   name             String
   description      String?
   links            String[]
   sold             Int          @default(0)
   created_at       DateTime     @default(now())
   price            Float
+  page             Pages[]
+  userId           String
   user             User         @relation(fields: [userId], references: [id])
   Submission       Submission[]
 }
@@ -41,15 +49,17 @@ model Pages {
   logo                String?
   description         String?
   social_links        Json?
-  accepted_currencies String[]
+  accepted_currencies CURRENCY[]
   terms_conditions    String[]
   slug                String
   eth_address         String?
   sol_address         String?
-  userId              Int
   visits              Int
+  userId              String
   user                User         @relation(fields: [userId], references: [id])
-  Submission          Submission[]
+  submissions         Submission[]
+  products            Product[] 
+  payment_intents     PaymentIntent[]
 }
 
 model Submission {
@@ -61,9 +71,21 @@ model Submission {
   email            String?
   eth_address      String?
   sol_address      String?
+  currency         CURRENCY
   pagesId          Int
   productId        Int
   transaction_hash String?
   page             Pages    @relation(fields: [pagesId], references: [id])
-  products         Product  @relation(fields: [productId], references: [id])
+  products         Product[]
+}
+
+model PaymentIntent {
+  id               String    @id @default(uuid())
+  value            Int
+  transaction_hash String
+  is_paid          Boolean @default(false)
+  pagesId          Int
+  page             Pages    @relation(fields: [pagesId], references: [id]) 
+  from_email       String
+  currency         CURRENCY[]
 }

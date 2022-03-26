@@ -1,9 +1,11 @@
 import type { NextFunction, Request, Response } from 'express'
-import { supabase } from "../client";
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { ResponseType } from '../types/ErrorType';
+import { PrismaClient } from '@prisma/client';
 
 const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+	const prisma = new PrismaClient()
+	
 	var decoded: JwtPayload | string = ''
 	try {
 		const JWT_SECRET = '1733729e-3910-4637-88c1-6fad57d04f26'
@@ -18,7 +20,13 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 		res.status(401).send(error)
 	}
 
-	res.locals.user = decoded.sub
+	const user = await prisma.user.findFirst({
+		where: {
+			email: (decoded as JwtPayload).email
+		}
+	})
+	
+	res.locals.user = user
 
 	next()
 }

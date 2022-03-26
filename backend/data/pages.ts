@@ -1,6 +1,7 @@
+import {CURRENCY} from "@prisma/client"
+
 export default [
   {
-    id: 1,
     fields: [
       { name: "email", type: "email" },
       { name: "name", type: "text" },
@@ -9,16 +10,15 @@ export default [
     logo: "string",
     description: "desc1",
     social_links: { twitter: "https://twitter.com" },
-    accepted_currencies: ["SOL", "ETH"],
+    accepted_currencies: [CURRENCY.solana, CURRENCY.ethereum],
     terms_conditions: ["condition 1", "condition 2"],
     slug: "composibility-store",
     eth_address: "0x4e7f624C9f2dbc3bcf97D03E765142Dd46fe1C46",
     sol_address: "BkHxK8FTeDn2HUva4nc1EBhHbEq54WwhqjQ1AY58g8GZ",
-    userId: 5,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     visits: 23,
   },
   {
-    id: 2,
     fields: [
       { name: "email", type: "email" },
       { name: "name", type: "text" },
@@ -27,16 +27,15 @@ export default [
     logo: "string",
     description: "desc1",
     social_links: { twitter: "https://twitter.com" },
-    accepted_currencies: ["SOL", "ETH"],
+    accepted_currencies: [CURRENCY.solana, CURRENCY.ethereum, CURRENCY.usdcsol, CURRENCY.usdceth],
     terms_conditions: ["condition 1", "condition 2"],
     slug: "network-switch-bla",
     eth_address: "0x4e7f624C9f2dbc3bcf97D03E765142Dd46fe1C46",
     sol_address: "BkHxK8FTeDn2HUva4nc1EBhHbEq54WwhqjQ1AY58g8GZ",
-    userId: 2,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     visits: 41,
   },
   {
-    id: 3,
     fields: [
       { name: "email", type: "email" },
       { name: "name", type: "text" },
@@ -45,16 +44,15 @@ export default [
     logo: "string",
     description: "desc1",
     social_links: { twitter: "https://twitter.com" },
-    accepted_currencies: ["SOL", "ETH"],
+    accepted_currencies: [CURRENCY.solana, CURRENCY.ethereum],
     terms_conditions: ["condition 1", "condition 2"],
     slug: "web3-store",
     eth_address: "0x4e7f624C9f2dbc3bcf97D03E765142Dd46fe1C46",
     sol_address: "BkHxK8FTeDn2HUva4nc1EBhHbEq54WwhqjQ1AY58g8GZ",
-    userId: 4,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     visits: 44,
   },
   {
-    id: 4,
     fields: [
       { name: "email", type: "email" },
       { name: "name", type: "text" },
@@ -63,12 +61,12 @@ export default [
     logo: "string",
     description: "desc1",
     social_links: { twitter: "https://twitter.com" },
-    accepted_currencies: ["SOL", "ETH"],
+    accepted_currencies: [CURRENCY.solana, CURRENCY.ethereum],
     terms_conditions: ["condition 1", "condition 2"],
     slug: "web3-store",
     eth_address: "0x4e7f624C9f2dbc3bcf97D03E765142Dd46fe1C46",
     sol_address: "BkHxK8FTeDn2HUva4nc1EBhHbEq54WwhqjQ1AY58g8GZ",
-    userId: 4,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     visits: 44,
   },
 ];

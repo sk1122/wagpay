@@ -4,15 +4,11 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import http from "http";
 import { pageRouter } from "./api/pages/router";
-import { pageRouter } from "./api/users/router";
+import { userRouter } from "./api/users/router";
 
 dotenv.config();
 
-if (!process.env.PORT) {
-  process.exit(1);
-}
-
-const PORT: number = parseInt(process.env.PORT as string, 10);
+const PORT: number = parseInt(process.env.PORT as string, 10) | 5000;
 const app = express();
 const server = http.createServer(app);
 
@@ -30,6 +26,7 @@ app.get("/", async (req: Request, res: Response) => {
 });
 
 app.use("/api/pages/", pageRouter);
+// app.use("/api/user/", userRouter);
 
 server.listen(PORT, () => {
   console.log(`Server listening @ ${PORT}`);

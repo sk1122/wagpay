@@ -34,10 +34,6 @@ class ProductController {
   };
 
   createProduct = async (req: Request, res: Response, next: NextFunction) => {
-    let jwt = await verifyUser(req, res, next);
-    let { user, error } = await supabase.auth.api.getUser(
-      req.headers["bearer-token"] as string
-    );
     const product: any = JSON.parse(req.body) as Product;
     const newProduct = await this.prisma.product.create({
       data: product,
@@ -72,13 +68,9 @@ class ProductController {
   };
 
   moneyEarned = async (req: Request, res: Response, next: NextFunction) => {
-    let jwt = await verifyUser(req, res, next);
-    let { user, error } = await supabase.auth.api.getUser(
-      req.headers["bearer-token"] as string
-    );
     const userData = await this.prisma.user.findFirst({
       where: {
-        email: user?.email,
+        email: res.locals.user.email,
       },
       include: {
         Product: true,
@@ -115,9 +107,9 @@ class ProductController {
 
 
 
-  
-  productSold = async (req: Request, res: Response) => {};
-  userProducts = async (req: Request, res: Response) => {};
+
+  productSold = async (req: Request, res: Response) => { };
+  userProducts = async (req: Request, res: Response) => { };
 }
 
 export default ProductController;

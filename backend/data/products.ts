@@ -2,7 +2,7 @@ export default [
   {
     id: 1,
     discounted_price: 12,
-    userId: 1,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     links: ["https://www.google.com/"],
     name: "test product 1",
     description: "test product 1 description bla bla bla bla bal",
@@ -12,7 +12,7 @@ export default [
   {
     id: 2,
     discounted_price: 12,
-    userId: 3,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     links: ["https://www.google.com/"],
     name: "test product 2",
     description: "test product 2 description bla bla bla bla bal",
@@ -22,7 +22,7 @@ export default [
   {
     id: 3,
     discounted_price: 10,
-    userId: 9,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     links: ["https://www.google.com/"],
     name: "test product 3",
     description: "test product 3 description bla bla bla bla bal",
@@ -32,7 +32,7 @@ export default [
   {
     id: 4,
     discounted_price: 6,
-    userId: 5,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     links: ["https://www.google.com/"],
     name: "test product 4",
     description: "test product 4 description bla bla bla bla bal",
@@ -42,7 +42,7 @@ export default [
   {
     id: 5,
     discounted_price: 12,
-    userId: 1,
+    userId: 'cdb8b172-12c2-453f-ba72-91e755b6cc71',
     links: ["https://www.google.com/"],
     name: "test product 5",
     description: "test product 5 description bla bla bla bla bal",

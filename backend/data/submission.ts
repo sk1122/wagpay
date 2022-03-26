@@ -1,3 +1,5 @@
+import { CURRENCY } from "@prisma/client";
+
 export default [
   {
     id: 1,
@@ -14,6 +16,7 @@ export default [
     productId: 3,
     transaction_hash:
       "0xcf8d4d1f83d55379d2e8f1fd714a69d1552be42d336c967ffd4e907c4e6961a9",
+    currency: CURRENCY.ethereum
   },
   {
     id: 2,
@@ -30,6 +33,7 @@ export default [
     productId: 2,
     transaction_hash:
       "0xcf8d4d1f83d55379d2e8f1fd714a69d1552be42d336c967ffd4e907c4e6961a9",
+    currency: CURRENCY.ethereum
   },
   {
     id: 3,
@@ -46,6 +50,7 @@ export default [
     productId: 1,
     transaction_hash:
       "0xcf8d4d1f83d55379d2e8f1fd714a69d1552be42d336c967ffd4e907c4e6961a9",
+      currency: CURRENCY.ethereum
   },
   {
     id: 4,
@@ -62,6 +67,7 @@ export default [
     productId: 5,
     transaction_hash:
       "0xcf8d4d1f83d55379d2e8f1fd714a69d1552be42d336c967ffd4e907c4e6961a9",
+      currency: CURRENCY.usdceth
   },
   {
     id: 5,
@@ -78,6 +84,7 @@ export default [
     productId: 4,
     transaction_hash:
       "0xcf8d4d1f83d55379d2e8f1fd714a69d1552be42d336c967ffd4e907c4e6961a9",
+      currency: CURRENCY.usdcsol
   },
   {
     id: 6,
@@ -94,5 +101,6 @@ export default [
     productId: 1,
     transaction_hash:
       "0xcf8d4d1f83d55379d2e8f1fd714a69d1552be42d336c967ffd4e907c4e6961a9",
+    currency: CURRENCY.solana
   },
 ];
