@@ -6,6 +6,7 @@ import http from "http";
 import { pageRouter } from "./api/pages/router";
 import { userRouter } from "./api/users/router";
 import { submissionRouter } from "./api/submissions/router";
+import { paymentIntentRouter } from "./api/payment_intent/router";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.get("/", async (req: Request, res: Response) => {
 
 app.use("/api/pages/", pageRouter);
 app.use("/api/submissions/", submissionRouter);
+app.use("/api/paymentIntents/", paymentIntentRouter);
 
 server.listen(PORT, () => {
   console.log(`Server listening @ ${PORT}`);
