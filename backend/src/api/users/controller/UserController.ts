@@ -16,76 +16,115 @@ interface User {
 class UserController {
   prisma = new PrismaClient();
 
-  getUser = async (req: Request, res: Response) => {
+  get = async (req: Request, res: Response) => {
     res.status(200).send(res.locals.user);
   };
 
-  storeUser = async (req: Request, res: Response) => {
+  getUser = async (req: Request, res: Response) => {
+    let userId = Number(req.params.id);
+    let user;
+    try {
+      user = await this.prisma.user.findFirst({
+        where: {
+          id: userId,
+        },
+      });
+
+      res.status(200).send(user);
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
+    }
+  };
+
+  post = async (req: Request, res: Response) => {
     req.body = JSON.parse(req.body);
     let userData = req.body as User;
     userData.is_paid = false;
-    let user = await this.prisma.user.create({
-      data: userData,
-    });
-
-    res.send(201).send(user);
-  };
-
-  checkUsername = async (req: Request, res: Response) => {
-    const username: any = req.query["username"];
-    const user = await this.prisma.user.findFirst({
-      where: {
-        username: username,
-      },
-    });
-
-    if (user == null) {
-      const returnData: User = {
-        username: username as string,
-        is_available: true,
-      };
-      res.status(200).send(returnData);
-      return;
-    }
-    const returnData: User = {
-      username: username as string,
-      is_available: false,
-    };
-
-    res.status(400).send(returnData);
-  };
-
-  getUserFromEmail = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const email: any = req.query["email"];
-    if (email) {
-      const user = await this.prisma.user.findMany({
-        where: {
-          email: email,
-        },
+    try {
+      let user = await this.prisma.user.create({
+        data: userData,
       });
-      res.status(200).send(user as User);
+
+      res.send(201).send(user);
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
     }
+  };
+
+  getUserFrom = async (req: Request, res: Response, next: NextFunction) => {
+    const email: string = String(req.query["email"]);
+    const username: string = String(req.query["username"]);
+    let user;
+
+    try {
+      if (email) {
+        user = await this.prisma.user.findFirst({
+          where: {
+            email: email,
+          },
+        });
+      } else if (username) {
+        user = await this.prisma.user.findFirst({
+          where: {
+            username: username,
+          },
+        });
+      }
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
+    }
+    res.status(200).send(user as User);
+
     next();
   };
 
-  updateUser = async (req: Request, res: Response, next: NextFunction) => {
-    let jwt: any = await verifyUser(req, res, next);
-    let { user, error } = await supabase.auth.api.getUser(
-      req.headers["bearer-token"] as string
-    );
+  update = async (req: Request, res: Response) => {
     const userBody = JSON.parse(req.body) as User;
-    const updatedUser = await this.prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: userBody,
-    });
-
+    let updatedUser;
+    try {
+      updatedUser = await this.prisma.user.update({
+        where: {
+          id: res.locals.user.id,
+        },
+        data: userBody,
+      });
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
+    }
     res.status(201).send(updatedUser);
+  };
+
+  delete = async (req: Request, res: Response) => {
+    const { id } = req.query;
+    let user;
+
+    try {
+      user = await this.prisma.user.delete({
+        where: {
+          id: Number(id),
+        },
+      });
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
+      return;
+    }
+
+    res.status(204).send(user);
   };
 }
 

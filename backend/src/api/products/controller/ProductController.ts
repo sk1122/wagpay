@@ -16,100 +16,80 @@ export interface Product {
 
 class ProductController {
   prisma = new PrismaClient();
-  getProduct = async (req: Request, res: Response) => {
-    const id: any = req.query["id"];
 
-    const product = await this.prisma.product.findFirst({
-      where: {
-        id: id,
-      },
-    });
-
-    if (product) {
-      res.status(201).send(product);
-      return;
-    }
-
-    res.status(400).send("Page was not found ");
-  };
-
-  createProduct = async (req: Request, res: Response, next: NextFunction) => {
-    const product: any = JSON.parse(req.body) as Product;
-    const newProduct = await this.prisma.product.create({
-      data: product,
-    });
-    if (newProduct) {
-      res.status(201).send(product);
-      return;
-    }
-
-    res.status(400).send("Page was not found ");
-  };
-
-  incrementSold = async (req: Request, res: Response) => {
-    const body = JSON.parse(req.body);
-    const product = await this.prisma.product.update({
-      data: {
-        sold: {
-          increment: 1,
+  get = async (req: Request, res: Response) => {
+    const id: number = Number(req.query["id"]);
+    let product;
+    try {
+      product = await this.prisma.product.findFirst({
+        where: {
+          id: id,
         },
-      },
-      where: {
-        id: body.product_id,
-      },
-    });
+      });
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
+    }
+    res.status(200).send(product);
+  };
 
-    if (product) {
-      res.status(201).send(product);
+  post = async (req: Request, res: Response) => {
+    const producData = req.body;
+    let product;
+    try {
+      product = await this.prisma.product.create({
+        data: producData,
+      });
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
+    }
+    res.status(200).send(product);
+  };
+
+  update = async (req: Request, res: Response) => {
+    const productId: number = Number(req.query.id);
+    const productData: any = JSON.parse(req.body) as Product;
+    let updatedProduct;
+    try {
+      updatedProduct = await this.prisma.product.update({
+        where: {
+          id: productId,
+        },
+        data: productData,
+      });
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
+    }
+    res.status(201).send(updatedProduct);
+  };
+  delete = async (req: Request, res: Response) => {
+    const { id } = req.query;
+    let product;
+
+    try {
+      product = await this.prisma.product.delete({
+        where: {
+          id: Number(id),
+        },
+      });
+    } catch (e) {
+      res.status(400).send({
+        error: e,
+        status: 400,
+      });
       return;
     }
 
-    res.status(400).send("Product not updated ");
+    res.status(204).send(product);
   };
-
-  moneyEarned = async (req: Request, res: Response, next: NextFunction) => {
-    const userData = await this.prisma.user.findFirst({
-      where: {
-        email: res.locals.user.email,
-      },
-      include: {
-        Product: true,
-        Pages: true,
-      },
-    });
-
-
-    if (req.method === "GET") {
-      const { data, error } = await supabase.rpc("total_money_earned", {
-        user_id: userData[0].id,
-      });
-
-      console.log(data, userData[0].id, "dasdsa");
-      if (!data || error) {
-        console.log(error);
-        res.status(400).send("Page was not created " + JSON.stringify(error));
-        return;
-      }
-
-      console.log(data);
-      res.status(201).send(data);
-    }
-  };
-
-
-
-
-
-
-
-
-
-
-
-
-
-  productSold = async (req: Request, res: Response) => { };
-  userProducts = async (req: Request, res: Response) => { };
 }
 
 export default ProductController;

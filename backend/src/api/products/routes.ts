@@ -5,8 +5,14 @@ export const productRouter = Router();
 const productController = new ProductController();
 
 productRouter.get("/", (req: Request, res: Response) =>
-  productController.getProduct(req, res)
+  productController.get(req, res)
 );
-productRouter.post("/", (req: Request, res: Response, next: NextFunction) =>
-  productController.createProduct(req, res, next)
+productRouter.post("/", (req: Request, res: Response) =>
+  productController.post(req, res)
+);
+productRouter.post("/", (req: Request, res: Response) =>
+  productController.update(req, res)
+);
+productRouter.post("/", (req: Request, res: Response) =>
+  productController.delete(req, res)
 );

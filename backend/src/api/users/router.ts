@@ -7,21 +7,22 @@ export const userRouter = Router();
 const userController = new UserController();
 
 userRouter.get("/", [verifyUser], (req: Request, res: Response) =>
+  userController.get(req, res)
+);
+
+userRouter.get("/getuser/", (req: Request, res: Response, next: NextFunction) =>
+  userController.getUserFrom(req, res, next)
+);
+
+userRouter.get("/:id", [verifyUser], (req: Request, res: Response) =>
   userController.getUser(req, res)
 );
-
 userRouter.post("/", [verifyUser], (req: Request, res: Response) =>
-  userController.storeUser(req, res)
+  userController.post(req, res)
 );
-
-userRouter.get("/checkusername", (req: Request, res: Response) =>
-  userController.checkUsername(req, res)
+userRouter.patch("/", [verifyUser], (req: Request, res: Response) =>
+  userController.update(req, res)
 );
-
-userRouter.get("/", (req: Request, res: Response, next: NextFunction) =>
-  userController.getUserFromEmail(req, res, next)
-);
-
-userRouter.patch("/", (req: Request, res: Response, next: NextFunction) =>
-  userController.updateUser(req, res, next)
+userRouter.delete("/", [verifyUser], (req: Request, res: Response) =>
+  userController.delete(req, res)
 );
