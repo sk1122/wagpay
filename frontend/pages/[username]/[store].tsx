@@ -99,6 +99,13 @@ const Store = ({ store }: Props) => {
     }
   }, [])
 
+  useEffect(() => {
+    if(query && query.price) {
+      setTotalPrice(Number(query.price))
+      setSelectProducts(true)
+    }
+  }, [])
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [qrCode, setQrCode] = useState(
     'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png'
@@ -107,6 +114,7 @@ const Store = ({ store }: Props) => {
     []
   )
   const [totalPrice, setTotalPrice] = useState(0)
+  const [selectProducts, setSelectProducts] = useState(false)
   const [url, setUrl] = useState('https://qr-code-styling.com')
 
   useEffect(() => console.log(qrCode), [qrCode])
@@ -300,7 +308,7 @@ const Store = ({ store }: Props) => {
               className="divide-y divide-gray-200 border-t border-b border-gray-200"
             >
               {store && store.products.map((product, productIdx) => (
-                <Product product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
               ))}
             </ul>
           </section>

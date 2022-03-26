@@ -546,13 +546,13 @@ const PaymentCard = ({
   }
 
   useEffect(() => {
-    if (option.toLowerCase() == 'ethereum') {
+    if (option.toLowerCase() == 'eth') {
       fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
       )
         .then((data) => data.json())
         .then((res) => setPrice(totalPrice / Number(res.ethereum.usd)))
-    } else if (option.toLowerCase() == 'solana') {
+    } else if (option.toLowerCase() == 'sol') {
       fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
       )
@@ -782,14 +782,14 @@ const PaymentCard = ({
                   <p>${totalPrice}</p>{' '}
                   <p>
                     ~{price.toFixed(2)}{' '}
-                    {option.toLowerCase() === 'ethereum'
+                    {option.toLowerCase() === 'eth'
                       ? 'ETH'
-                      : option.toLowerCase() === 'solana'
+                      : option.toLowerCase() === 'sol'
                       ? 'SOL'
                       : 'USDC'}
                   </p>
                 </div>
-                {option.toLowerCase() === 'solana' && (
+                {option.toLowerCase() === 'sol' && (
                   <div
                     onClick={() => qrCode()}
                     className="h-10 w-10 cursor-pointer rounded-xl"

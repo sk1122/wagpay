@@ -7,6 +7,7 @@ interface Props {
 	add: Function
 	remove: Function
 	productIds: any[]
+	selectProducts: boolean
 }
 
 const Product = (props: Props) => {
@@ -59,7 +60,7 @@ const Product = (props: Props) => {
 				</p>
 				</div>
 
-				<div className="mt-4 sm:mt-0 sm:pr-9">
+				<div className={(props.selectProducts ? "hidden " : "") + "mt-4 sm:mt-0 sm:pr-9"}>
 					<div className="flex justify-center items-center space-x-2 absolute top-0 right-0">
 						<button
 						type="button"
