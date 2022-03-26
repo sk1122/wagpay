@@ -29,6 +29,7 @@ import { supabase } from '../supabase'
 
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar/Navbar'
+import { ethers } from 'ethers'
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
@@ -149,6 +150,9 @@ const Homepage: React.FC = () => {
     try {
       const provider = await web3modal.connect()
       console.log(provider, 'PROVIDER')
+      const ethProvider = new ethers.providers.Web3Provider(provider)
+      const ethSigner = await ethProvider.getSigner()
+      setETH(await ethSigner.getAddress())
       return provider
     } catch (e) {
       throw e
@@ -462,12 +466,6 @@ const Homepage: React.FC = () => {
                         WagPay username is a step to create your store / pages and start accepting payments in multiple cryptocurrencies
                       </p>
                     </div>
-                    <footer className="mt-6">
-                      <p className="text-base font-medium text-white">v3n0m</p>
-                      <p className="text-base font-medium text-cyan-100">
-                        CEO at Azuki
-                      </p>
-                    </footer>
                   </blockquote>
                 </div>
               </div>
