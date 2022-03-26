@@ -5,6 +5,7 @@ import * as dotenv from "dotenv";
 import http from "http";
 import { pageRouter } from "./api/pages/router";
 import { userRouter } from "./api/users/router";
+import { submissionRouter } from "./api/submissions/router";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ app.get("/", async (req: Request, res: Response) => {
 });
 
 app.use("/api/pages/", pageRouter);
-// app.use("/api/user/", userRouter);
+app.use("/api/submissions/", submissionRouter);
 
 server.listen(PORT, () => {
   console.log(`Server listening @ ${PORT}`);
