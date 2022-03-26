@@ -52,6 +52,7 @@ interface Page {
 
 interface Props {
   cards: any[]
+  username: string
 }
 
 export const Ethereum = () => {
@@ -119,7 +120,7 @@ export const Solana = () => {
   )
 }
 
-const Pages = ({ cards }: Props) => {
+const Pages = ({ cards, username }: Props) => {
   const [pages, setPages] = useState<Page[]>()
 
   const fetchPages = async () => {
@@ -214,7 +215,7 @@ const Pages = ({ cards }: Props) => {
                         <span className="truncate">{page.title}</span>
                         <span>
                           <a
-                            href={`/${page.slug}`}
+                            href={`/${username}/${page.slug}`}
                             className="font-medium text-gray-900"
                           >
                             {page.slug}
@@ -292,7 +293,7 @@ const Pages = ({ cards }: Props) => {
                       <tr key={page.id} className="bg-white">
                         <td className="w-full max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                           <div className="flex">
-                            <Link href={`/${page.slug}`}>
+                            <Link href={`/${username}/${page.slug}`}>
                               <a className="group inline-flex space-x-2 truncate text-sm">
                                 <p className="truncate text-gray-500 group-hover:text-gray-900">
                                   {page.title}

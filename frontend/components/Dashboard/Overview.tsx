@@ -117,9 +117,10 @@ export const Solana = () => {
 
 interface Props {
   cards: any[]
+  username: string
 }
 
-const Overview = ({ cards }: Props) => {
+const Overview = ({ cards, username }: Props) => {
   const [transactions, setTransactions] = useState<any[]>([])
 
   const fetchTransactions = async () => {
@@ -346,7 +347,7 @@ const Overview = ({ cards }: Props) => {
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
-                          <Link href={`${transaction.page_id.slug}`}>
+                          <Link href={`/${username}${transaction.page_id.slug}`}>
                             {transaction.page_id.title}
                           </Link>
                         </td>
@@ -475,7 +476,7 @@ const Overview = ({ cards }: Props) => {
                       <tr key={page.id} className="bg-white">
                         <td className="w-full max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                           <div className="flex">
-                            <Link href={`/${page.slug}`}>
+                            <Link href={`/${username}/${page.slug}`}>
                               <a className="group inline-flex space-x-2 truncate text-sm">
                                 <p className="truncate text-gray-500 group-hover:text-gray-900">
                                   {page.title}

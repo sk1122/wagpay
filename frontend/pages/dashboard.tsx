@@ -484,13 +484,13 @@ export default function Dashboard() {
           <main className="flex-1 pb-8">
             {/* Page header */}
             <PageHeader user={user} />
-            {currentTab === 'overview' && <Overview cards={cards} />}
-            {currentTab === 'pages' && <Pages cards={cards} />}
+            {currentTab === 'overview' && <Overview cards={cards} username={user.username} />}
+            {currentTab === 'pages' && <Pages cards={cards} username={user.username} />}
             {currentTab === 'transactions' && <Transactions cards={cards} />}
             {currentTab === 'products' && <Products cards={cards} />}
-            {currentTab === 'settings' && (
+            {/* {currentTab === 'settings' && (
               <Settings cards={cards} transactions={transactions} />
-            )}
+            )} */}
           </main>
         </div>
       </div>
