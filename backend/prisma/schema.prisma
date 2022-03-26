@@ -88,4 +88,5 @@ model PaymentIntent {
   page             Pages    @relation(fields: [pagesId], references: [id]) 
   from_email       String
   currency         CURRENCY[]
+  created_at       DateTime @default(now())
 }
