@@ -1,18 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { definitions } from "../../../types";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import { supabase } from "../../../../../core/supabase";
 import verifyUser from "../../../middlewares/verifyUser";
 
-interface User {
-  id?: number;
-  username?: string;
-  is_available?: boolean;
-  eth_address?: string;
-  sol_address?: string;
-  email?: string;
-  is_paid?: boolean;
-}
 class UserController {
   prisma = new PrismaClient();
 
@@ -21,7 +12,7 @@ class UserController {
   };
 
   getUser = async (req: Request, res: Response) => {
-    let userId = Number(req.params.id);
+    let userId = req.params.id;
     let user;
     try {
       user = await this.prisma.user.findFirst({
@@ -40,14 +31,12 @@ class UserController {
   };
 
   post = async (req: Request, res: Response) => {
-    req.body = JSON.parse(req.body);
-    let userData = req.body as User;
+    let userData = req.body;
     userData.is_paid = false;
     try {
       let user = await this.prisma.user.create({
         data: userData,
       });
-
       res.send(201).send(user);
     } catch (e) {
       res.status(400).send({
@@ -88,7 +77,7 @@ class UserController {
   };
 
   update = async (req: Request, res: Response) => {
-    const userBody = JSON.parse(req.body) as User;
+    const userBody = req.body;
     let updatedUser;
     try {
       updatedUser = await this.prisma.user.update({
@@ -107,13 +96,13 @@ class UserController {
   };
 
   delete = async (req: Request, res: Response) => {
-    const { id } = req.query;
+    const userId = req.query.id as string;
     let user;
 
     try {
       user = await this.prisma.user.delete({
         where: {
-          id: Number(id),
+          id: userId,
         },
       });
     } catch (e) {
