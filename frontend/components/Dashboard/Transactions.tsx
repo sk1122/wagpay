@@ -277,7 +277,7 @@ const Transactions = ({ cards }: Props) => {
                               'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize'
                             )}
                           >
-                            {transaction.eth_address && (
+                            {transaction.currency === 'ETH' && (
                               <>
                                 {!transaction.transaction_hash ? (
                                   <span>❌</span>
@@ -297,7 +297,7 @@ const Transactions = ({ cards }: Props) => {
                                 </a>
                               </>
                             )}
-                            {transaction.sol_address && (
+                            {transaction.currency === 'SOL' && (
                               <>
                                 {!transaction.transaction_hash ? (
                                   <span>❌</span>

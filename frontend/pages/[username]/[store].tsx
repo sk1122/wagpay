@@ -42,9 +42,9 @@ interface Props {
 }
 
 export const getServerSideProps = async (context: any) => {
-  try {
+  // try {
     const res = await fetch(
-      `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
+      `http://localhost:3000/api/pages/${context.params.store}?username=${context.params.username}`
     )
     console.log(
       `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
@@ -55,14 +55,14 @@ export const getServerSideProps = async (context: any) => {
         store: store,
       },
     }
-  } catch (e) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: `/claim?username=${context.params.store}`,
-      },
-    }
-  }
+  // } catch (e) {
+  //   return {
+  //     redirect: {
+  //       permanent: false,
+  //       destination: `/claim?username=${context.params.store}`,
+  //     },
+  //   }
+  // }
 }
 
 const Store = ({ store }: Props) => {
@@ -155,7 +155,9 @@ const Store = ({ store }: Props) => {
     email: string,
     fields: any,
     eth: string,
-    sol: string
+    sol: string,
+    currency: string,
+    txHash?: string
   ) => {
     const transaction = {
       email: email,
@@ -164,6 +166,8 @@ const Store = ({ store }: Props) => {
       sol_address: sol,
       page_id: store.id,
       products: selectedProducts.map((value) => value.id),
+      transaction_hash: txHash,
+      currency: currency
     }
 
     const data = await fetch('/api/submissions/create', {

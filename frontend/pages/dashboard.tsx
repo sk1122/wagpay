@@ -147,6 +147,7 @@ export default function Dashboard() {
 
   const getMoneyEarned = async () => {
     if (running) {
+      console.log(supabase.auth.session()?.access_token as string, "SESSION")
       const data = await fetch('/api/products/money_earned', {
         headers: {
           'bearer-token': supabase.auth.session()?.access_token as string,
