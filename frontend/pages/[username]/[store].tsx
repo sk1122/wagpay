@@ -158,7 +158,7 @@ const Store = ({ store }: Props) => {
     eth: string,
     sol: string,
     currency: string,
-    txHash?: string
+    txHash: string
   ) => {
     const transaction = {
       email: email,
@@ -316,7 +316,11 @@ const Store = ({ store }: Props) => {
               className="divide-y divide-gray-200 border-t border-b border-gray-200"
             >
               {store && store.products.map((product, productIdx) => (
+                <>
                 <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                </>
               ))}
             </ul>
           </section>
@@ -324,7 +328,7 @@ const Store = ({ store }: Props) => {
           {/* Payment Card */}
           <section
             aria-labelledby="payment-card"
-            className="mt-16 rounded-lg  lg:col-span-5 lg:mt-0"
+            className="lg:fixed lg:right-20 2xl:right-80 lg:w-1/3 xl:w-1/3 2xl:w-1/4 mt-16 rounded-lg  lg:col-span-5 lg:mt-0"
           >
             <PaymentCard
               accepted_currencies={store.accepted_currencies}

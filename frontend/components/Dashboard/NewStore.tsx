@@ -31,7 +31,9 @@ interface Field {
 type _fields = 'name' | 'type'
 type _products = 'discounted_price' | 'price' | 'name' | 'description' | 'links' | 'image'
 
-const supported_currencies = ['ethereum', 'solana', 'usdcsol', 'usdceth']
+const supported_currencies = [{name: 'Ethereum', symbol: 'ethereum'}, {name: 'Solana', symbol: "solana"}, {name: 'USDC (Solana)', symbol: 'usdcsol'}, {name: 'USDC (Ethereum)', symbol: 'usdceth'}]
+
+const supported_types = ['text', 'number']
 
 const NewStore = (props: Props) => {
   const [products, setProducts] = useState<Product[]>([])
@@ -48,6 +50,7 @@ const NewStore = (props: Props) => {
   const [slug, setSlug] = useState<string>('')
   const [eth, setETH] = useState<string>('')
   const [sol, setSOL] = useState<string>('')
+  const [showCurrencies, setShowCurrencies] = useState<string[]>([])
 
   const changeField = async (field: _fields, value: any | null, idx: number) => {
     console.log(field, value, idx, fields.length)
@@ -157,9 +160,25 @@ const NewStore = (props: Props) => {
 
     toast.dismiss(toastId)
     toast.success('Successfully Created Store')
-    // props.setIsOpen(false)
+    props.setIsOpen(false)
     setTweet(`https://wagpay.xyz/${props.username}/${slug}`)
     setStoreSuccess(true)
+  }
+
+  const removeField = (idx: number) => {
+    setFields((ps) => {
+      let newFields = [...fields]
+      newFields.splice(idx, 1)
+      return newFields
+    })
+  }
+
+  const removeProduct = (idx: number) => {
+    setProducts((ps) => {
+      let newProducts = [...products]
+      newProducts.splice(idx, 1)
+      return newProducts
+    })
   }
 
   useEffect(() => console.log(products), [products])
@@ -241,8 +260,8 @@ const NewStore = (props: Props) => {
       </div>
       <div className="flex flex-col space-y-2">
         <label htmlFor="Store">Supported Currenices</label>
-        <p>
-          {currencies.map((v) => (
+        <p className='space-x-2'>
+          {showCurrencies.map((v) => (
             <span>{v}</span>
           ))}
         </p>
@@ -262,10 +281,10 @@ const NewStore = (props: Props) => {
 						ease-in-out
 						focus:border-indigo-600 focus:bg-white focus:text-gray-700 focus:outline-none"
           aria-label="Default select example"
-          onChange={(e) => setCurrencies(() => [...currencies, e.target.value])}
+          onChange={(e) => {if(currencies.includes(e.target.value)) {return}; setCurrencies(() => [...currencies, e.target.value]); setShowCurrencies(() => [...showCurrencies, supported_currencies[e.target.selectedIndex].name])}}
         >
           {supported_currencies.map((value) => {
-            return <option value={value}>{value}</option>
+            return <option value={value.symbol}>{value.name}</option>
           })}
         </select>
       </div>
@@ -274,7 +293,10 @@ const NewStore = (props: Props) => {
         {fields.map((field, idx) => {
           return (
             <div key={idx} className="flex flex-col space-y-2">
-              <h3>Field {field.name}</h3>
+              <div className='w-full flex justify-between items-center'>
+                <h3>Field {field.name}</h3>
+                <span className='text-3xl cursor-pointer' onClick={() => removeField(idx)}>-</span>
+              </div>
               <div className="flex space-x-2">
                 <input
                   value={field.name}
@@ -284,14 +306,20 @@ const NewStore = (props: Props) => {
                   placeholder="Field Name"
                   className="w-1/2 rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
                 />
-                <input
-                  value={field.type}
-                  onChange={(e) => changeField('type', e.target.value, idx)}
-                  type="text"
-                  name="Store"
-                  placeholder="Field Type"
-                  className="w-1/2 rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-                />
+                <div className="bg-white w-1/2 rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
+                  <select
+                    className="relative block w-full rounded-md border-gray-300 bg-transparent focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    aria-label="Default select example"
+                    value={field.type}
+                    onChange={(e) =>
+                      changeField('type', e.target.value, idx)
+                    }
+                  >
+                    {supported_types.map(value => {
+                      return <option value={value}>{value}</option>
+                    })}
+                  </select>
+                </div>
               </div>
             </div>
           )
@@ -314,7 +342,10 @@ const NewStore = (props: Props) => {
         {products.map((product, idx) => {
           return (
             <div key={idx} className="flex flex-col space-y-2">
-              <h3>Product {product.name}</h3>
+              <div className='w-full flex justify-between items-center'>
+                <h3>Product {product.name}</h3>
+                <span className='text-3xl cursor-pointer' onClick={() => removeProduct(idx)}>-</span>
+              </div>
               <div className="flex space-x-2">
                 <input
                   value={product.name}
