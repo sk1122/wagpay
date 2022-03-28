@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import Product from '../../components/Product'
 import PaymentCard from '../../components/PaymentCard'
 import { ChangeEvent, useLayoutEffect, useRef, useState } from 'react'
@@ -157,7 +158,7 @@ const Store = ({ store }: Props) => {
     eth: string,
     sol: string,
     currency: string,
-    txHash?: string
+    txHash: string
   ) => {
     const transaction = {
       email: email,
@@ -291,6 +292,9 @@ const Store = ({ store }: Props) => {
 
   return (
     <div className="w-full min-h-screen bg-gray-900 font-inter">
+      <Head>
+        <title>{store.title} - WagPay</title>
+      </Head>
       <div className={(isModalOpen ? "" : "hidden") + "w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
         <div className={(isModalOpen ? "" : "hidden") + " absolute bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
 				  <p className='text-white'>Scan this code to pay with any solana mobile wallet</p>
@@ -312,7 +316,11 @@ const Store = ({ store }: Props) => {
               className="divide-y divide-gray-200 border-t border-b border-gray-200"
             >
               {store && store.products.map((product, productIdx) => (
+                <>
                 <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                </>
               ))}
             </ul>
           </section>
@@ -320,7 +328,7 @@ const Store = ({ store }: Props) => {
           {/* Payment Card */}
           <section
             aria-labelledby="payment-card"
-            className="mt-16 rounded-lg  lg:col-span-5 lg:mt-0"
+            className="lg:fixed lg:right-20 2xl:right-80 lg:w-1/3 xl:w-1/3 2xl:w-1/4 mt-16 rounded-lg  lg:col-span-5 lg:mt-0"
           >
             <PaymentCard
               accepted_currencies={store.accepted_currencies}
