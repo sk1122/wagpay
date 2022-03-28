@@ -42,9 +42,9 @@ interface Props {
 }
 
 export const getServerSideProps = async (context: any) => {
-  // try {
+  try {
     const res = await fetch(
-      `http://localhost:3000/api/pages/${context.params.store}?username=${context.params.username}`
+      `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
     )
     console.log(
       `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
@@ -55,14 +55,14 @@ export const getServerSideProps = async (context: any) => {
         store: store,
       },
     }
-  // } catch (e) {
-  //   return {
-  //     redirect: {
-  //       permanent: false,
-  //       destination: `/claim?username=${context.params.store}`,
-  //     },
-  //   }
-  // }
+  } catch (e) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: `/claim?username=${context.params.username}`,
+      },
+    }
+  }
 }
 
 const Store = ({ store }: Props) => {
