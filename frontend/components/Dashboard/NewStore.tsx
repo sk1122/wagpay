@@ -20,7 +20,6 @@ interface Product {
   name: string
   description: string
   links: string[]
-  image: any
 }
 
 interface Field {
@@ -32,7 +31,7 @@ interface Field {
 type _fields = 'name' | 'type'
 type _products = 'discounted_price' | 'price' | 'name' | 'description' | 'links' | 'image'
 
-const supported_currencies = ['SOL', 'ETH']
+const supported_currencies = ['ethereum', 'solana', 'usdcsol', 'usdceth']
 
 const NewStore = (props: Props) => {
   const [products, setProducts] = useState<Product[]>([])
@@ -66,13 +65,14 @@ const NewStore = (props: Props) => {
     if (field === 'discounted_price') {
       setProducts((prevState) => {
         let product_values = [...products]
-        product_values[idx].discounted_price = value as number
+        product_values[idx].discounted_price = Number(value)
+        product_values[idx].price = Number(value)
         return product_values
       })
     } else if (field === 'price') {
       setProducts((prevState) => {
         let product_values = [...products]
-        product_values[idx].price = value as number
+        product_values[idx].price = Number(value)
         return product_values
       })
     } else if (field === 'description') {
@@ -94,13 +94,14 @@ const NewStore = (props: Props) => {
         product_values[idx].links = String(value).split(',')
         return product_values
       })
-    } else if (field === 'image') {
-      setProducts((prevState) => {
-        let product_values = [...products]
-        product_values[idx].image = value[0] as File
-        return product_values
-      })
-    }
+    } 
+    // else if (field === 'image') {
+    //   setProducts((prevState) => {
+    //     let product_values = [...products]
+    //     product_values[idx].image = value[0] as File
+    //     return product_values
+    //   })
+    // }
   }
 
   // @ts-ignore
@@ -123,7 +124,7 @@ const NewStore = (props: Props) => {
 
     const toastId = toast.loading('Creating Store')
     try {
-      var data = await fetch('/api/pages/create', {
+      var data = await fetch('http://localhost:2000/api/pages/', {
         method: 'POST',
         body: JSON.stringify({
           title: title,
@@ -134,11 +135,13 @@ const NewStore = (props: Props) => {
           slug: slug,
           eth_address: eth,
           sol_address: sol,
-          products: products,
+          visits: 0,
+          products: {create: products},
           fields: fields,
         }),
         headers: {
           'bearer-token': supabase.auth.session()?.access_token as string,
+          'Content-Type': 'application/json'
         },
       })
     } catch (e) {
@@ -150,7 +153,7 @@ const NewStore = (props: Props) => {
 
     const res = await data.json()
 
-    uploadFile(logo as File, `${res.id}/logo.png`)
+    // uploadFile(logo as File, `${res.id}/logo.png`)
 
     toast.dismiss(toastId)
     toast.success('Successfully Created Store')
@@ -362,7 +365,7 @@ const NewStore = (props: Props) => {
                 name: '',
                 description: '',
                 links: [],
-                image: null
+                sold: 0
               },
             ])
           }

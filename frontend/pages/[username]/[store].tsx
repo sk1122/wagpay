@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import Product from '../../components/Product'
 import PaymentCard from '../../components/PaymentCard'
 import { ChangeEvent, useLayoutEffect, useRef, useState } from 'react'
@@ -291,6 +292,9 @@ const Store = ({ store }: Props) => {
 
   return (
     <div className="w-full min-h-screen bg-gray-900 font-inter">
+      <Head>
+        <title>{store.title} - WagPay</title>
+      </Head>
       <div className={(isModalOpen ? "" : "hidden") + "w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
         <div className={(isModalOpen ? "" : "hidden") + " absolute bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
 				  <p className='text-white'>Scan this code to pay with any solana mobile wallet</p>
