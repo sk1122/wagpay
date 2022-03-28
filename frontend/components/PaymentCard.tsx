@@ -57,7 +57,7 @@ const currencies = [
 		wallets: ['Phantom']
 	},
 	{
-		symbol: 'USDC (SOL)',
+		symbol: 'USDCSOL',
 		name: 'USDC (Solana)',
 		wallets: ['Phantom']
 	}
@@ -199,8 +199,8 @@ const PaymentCard = ({
         {}
       )
       setQrCode(qrCode.dataURL)
-    } else if (option.toLowerCase() === 'solana') {
-      const connection = new Connection(clusterApiUrl('mainnet-beta'))
+    } else if (option.toLowerCase() === 'sol') {
+      const connection = new Connection(clusterApiUrl('devnet'))
 
       console.log('2.  a customer checkout \n')
       console.log(merchantSOL)
@@ -224,6 +224,7 @@ const PaymentCard = ({
 
       // const qrCode = createQR(url);
       // console.log(qrCode)
+      console.log(url)
       setURL(url)
       // setQrCode(qrCode._qr?.createDataURL())
       setIsModalOpen(true)
@@ -243,6 +244,7 @@ const PaymentCard = ({
          *
          * You can implement a polling strategy to query for the transaction periodically.
          */
+        var a = false
         const interval = setInterval(async () => {
           console.count('Checking for transaction...')
           try {
@@ -252,7 +254,8 @@ const PaymentCard = ({
               undefined,
               'confirmed'
             )
-            console.log('\n 🖌  Signature found: ', signatureInfo.signature)
+            console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
+            if(!a) {a = true; var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())}
             clearInterval(interval)
             resolve(signatureInfo)
           } catch (error: any) {
@@ -291,13 +294,14 @@ const PaymentCard = ({
 
         // Update payment status
         paymentStatus = 'validated'
-        console.log('✅ Payment validated')
-        console.log('📦 Ship order to customer')
+        // @ts-ignore
+        // await updateTransaction(txId, true, signatureInfo?.signature)
       } catch (error) {
         console.error('❌ Payment failed', error)
       }
     } else if (option.toLowerCase() === 'usdc (ethereum)') {
     } else if (option.toLowerCase() === 'usdc (solana)') {
+      const connection = new Connection(clusterApiUrl('devnet'))
       const splToken = new PublicKey(
         'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
       )
@@ -320,6 +324,79 @@ const PaymentCard = ({
       const qrCode = createQR(url)
       console.log(qrCode)
       setQrCode(qrCode._qr?.createDataURL())
+
+      
+
+      console.log('\n5. Find the transaction')
+      let signatureInfo
+
+      const { signature } = await new Promise((resolve, reject) => {
+        /**
+         * Retry until we find the transaction
+         *
+         * If a transaction with the given reference can't be found, the `findTransactionSignature`
+         * function will throw an error. There are a few reasons why this could be a false negative:
+         *
+         * - Transaction is not yet confirmed
+         * - Customer is yet to approve/complete the transaction
+         *
+         * You can implement a polling strategy to query for the transaction periodically.
+         */
+        var a = false
+        const interval = setInterval(async () => {
+          console.count('Checking for transaction...')
+          try {
+            signatureInfo = await findTransactionSignature(
+              connection,
+              reference,
+              undefined,
+              'confirmed'
+            )
+            console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
+            if(!a) {a = true; var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())}
+            clearInterval(interval)
+            resolve(signatureInfo)
+          } catch (error: any) {
+            if (!(error instanceof FindTransactionSignatureError)) {
+              console.error(error)
+              clearInterval(interval)
+              reject(error)
+            }
+          }
+        }, 250)
+      })
+
+      // Update payment status
+      var paymentStatus = 'confirmed'
+
+      /**
+       * Validate transaction
+       *
+       * Once the `findTransactionSignature` function returns a signature,
+       * it confirms that a transaction with reference to this order has been recorded on-chain.
+       *
+       * `validateTransactionSignature` allows you to validate that the transaction signature
+       * found matches the transaction that you expected.
+       */
+      console.log('\n6. 🔗 Validate transaction \n')
+
+      try {
+        await validateTransactionSignature(
+          connection,
+          signature,
+          recipient,
+          amount,
+          undefined,
+          reference
+        )
+
+        // Update payment status
+        paymentStatus = 'validated'
+         // @ts-ignore
+        // await updateTransaction(txId, true, signatureInfo?.signature)
+      } catch (error) {
+        console.error('❌ Payment failed', error)
+      }
     }
     setIsModalOpen(true)
   }
@@ -420,14 +497,14 @@ const PaymentCard = ({
           value: ethers.utils.parseEther(price.toFixed(5)),
         })
 
-        var txId = await createTransaction(email, fields, address, '')
+        var txId = await createTransaction(email, fields, address, '', 'ETH')
         console.log(tx)
         await updateTransaction(txId, true, tx.hash)
         toast.dismiss(toastTransact)
         toast.success('Successfully sent Transaction')
         return tx
       } catch (e) {
-        let txId = await createTransaction(email, fields, address, '')
+        let txId = await createTransaction(email, fields, address, '', 'ETH')
         await updateTransaction(txId, false, '')
         toast.dismiss(toastTransact)
         toast.error('Transaction not successful')
@@ -475,13 +552,13 @@ const PaymentCard = ({
         await tx.wait()
         toast.dismiss(toastTransact)
         toast.success('Transaction Succesful')
-        var txId = await createTransaction(email, fields, address, '')
+        var txId = await createTransaction(email, fields, address, '', 'USDCETH')
         console.log(tx)
         await updateTransaction(txId, true, tx.hash)
       } catch (e) {
         toast.dismiss(toastTransact)
         toast.error("Can't Transact")
-        var txId = await createTransaction(email, fields, eth, '')
+        var txId = await createTransaction(email, fields, eth, '', 'USDCETH')
         await updateTransaction(txId, false, '')
       }
     } else if (option.toLowerCase() == 'usdc (solana)') {
@@ -501,7 +578,7 @@ const PaymentCard = ({
       toastIdTransact = toast.loading('Creating Solana Transaction')
 
       const tokenAccount = await getAssociatedTokenAddress(
-        new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'),
+        new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
         solProvider.publicKey
       )
 
@@ -509,7 +586,7 @@ const PaymentCard = ({
       console.log(merchantSOL)
 
       const merchantTokenAccount = await getAssociatedTokenAddress(
-        new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'),
+        new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
         new PublicKey(merchantSOL)
       )
 

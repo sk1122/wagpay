@@ -59,7 +59,7 @@ export const getServerSideProps = async (context: any) => {
     return {
       redirect: {
         permanent: false,
-        destination: `/claim?username=${context.params.store}`,
+        destination: `/claim?username=${context.params.username}`,
       },
     }
   }
@@ -155,7 +155,9 @@ const Store = ({ store }: Props) => {
     email: string,
     fields: any,
     eth: string,
-    sol: string
+    sol: string,
+    currency: string,
+    txHash?: string
   ) => {
     const transaction = {
       email: email,
@@ -164,6 +166,8 @@ const Store = ({ store }: Props) => {
       sol_address: sol,
       page_id: store.id,
       products: selectedProducts.map((value) => value.id),
+      transaction_hash: txHash,
+      currency: currency
     }
 
     const data = await fetch('/api/submissions/create', {
