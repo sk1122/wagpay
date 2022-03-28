@@ -251,7 +251,7 @@ const Homepage: React.FC = () => {
                       <span className="rounded-full bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 px-3 py-0.5 text-xs font-semibold uppercase leading-5 tracking-wide text-white">
                         Checkout our demo page
                       </span>
-                      <Link href="/cosmix/strings/">
+                      <Link href="/sk1122/wagpay/">
                         <a className="ml-4 text-sm">
                           Click here
                         </a>

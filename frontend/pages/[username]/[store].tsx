@@ -318,8 +318,6 @@ const Store = ({ store }: Props) => {
               {store && store.products.map((product, productIdx) => (
                 <>
                 <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
-                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
-                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
                 </>
               ))}
             </ul>
