@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { definitions } from "../../../types";
-import { PrismaClient, User } from "@prisma/client";
-import { supabase } from "../../../../../core/supabase";
-import verifyUser from "../../../middlewares/verifyUser";
+
+import { PrismaClient } from "@prisma/client";
 
 class UserController {
   prisma = new PrismaClient();
@@ -10,9 +8,8 @@ class UserController {
   get = async (req: Request, res: Response) => {
     res.status(200).send(res.locals.user);
   };
-
   getUser = async (req: Request, res: Response) => {
-    let userId = req.params.id;
+    let userId: any = req.params.id;
     let user;
     try {
       user = await this.prisma.user.findFirst({
@@ -20,7 +17,6 @@ class UserController {
           id: userId,
         },
       });
-
       res.status(200).send(user);
     } catch (e) {
       res.status(400).send({
@@ -32,48 +28,18 @@ class UserController {
 
   post = async (req: Request, res: Response) => {
     let userData = req.body;
-    userData.is_paid = false;
     try {
       let user = await this.prisma.user.create({
         data: userData,
       });
-      res.send(201).send(user);
+      console.log(user);
+      res.status(200).send(user);
     } catch (e) {
       res.status(400).send({
         error: e,
         status: 400,
       });
     }
-  };
-
-  getUserFrom = async (req: Request, res: Response, next: NextFunction) => {
-    const email: string = String(req.query["email"]);
-    const username: string = String(req.query["username"]);
-    let user;
-
-    try {
-      if (email) {
-        user = await this.prisma.user.findFirst({
-          where: {
-            email: email,
-          },
-        });
-      } else if (username) {
-        user = await this.prisma.user.findFirst({
-          where: {
-            username: username,
-          },
-        });
-      }
-    } catch (e) {
-      res.status(400).send({
-        error: e,
-        status: 400,
-      });
-    }
-    res.status(200).send(user as User);
-
-    next();
   };
 
   update = async (req: Request, res: Response) => {
@@ -86,34 +52,33 @@ class UserController {
         },
         data: userBody,
       });
+      res.status(201).send(updatedUser);
     } catch (e) {
       res.status(400).send({
         error: e,
         status: 400,
       });
     }
-    res.status(201).send(updatedUser);
   };
 
   delete = async (req: Request, res: Response) => {
-    const userId = req.query.id as string;
-    let user;
+    const userId: any = req.query.id as string;
 
     try {
-      user = await this.prisma.user.delete({
+      await this.prisma.user.delete({
         where: {
           id: userId,
         },
       });
+      res.status(204).send({
+        data: "user deleted",
+      });
     } catch (e) {
       res.status(400).send({
         error: e,
         status: 400,
       });
-      return;
     }
-
-    res.status(204).send(user);
   };
 }
 

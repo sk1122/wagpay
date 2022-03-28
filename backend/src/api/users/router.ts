@@ -10,10 +10,6 @@ userRouter.get("/", [verifyUser], (req: Request, res: Response) =>
   userController.get(req, res)
 );
 
-userRouter.get("/getuser/", (req: Request, res: Response, next: NextFunction) =>
-  userController.getUserFrom(req, res, next)
-);
-
 userRouter.get("/:id", [verifyUser], (req: Request, res: Response) =>
   userController.getUser(req, res)
 );
