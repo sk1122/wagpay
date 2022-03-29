@@ -150,7 +150,7 @@ const NewStore = (props: Props) => {
 
     toast.dismiss(toastId)
     toast.success('Successfully Created Store')
-    // props.setIsOpen(false)
+    props.setIsOpen(false)
     setTweet(`https://wagpay.xyz/${props.username}/${slug}`)
     setStoreSuccess(true)
   }
