@@ -157,21 +157,6 @@ const NewStore = (props: Props) => {
     setTweet(`https://wagpay.xyz/${props.username}/${slug}`)
     setStoreSuccess(true)
   }
-  const removeField = (idx: number) => {
-    setFields((ps) => {
-      let newFields = [...fields]
-      newFields.splice(idx, 1)
-      return newFields
-    })
-  }
-
-  const removeProduct = (idx: number) => {
-    setProducts((ps) => {
-      let newProducts = [...products]
-      newProducts.splice(idx, 1)
-      return newProducts
-    })
-  }
 
   const removeField = (idx: number) => {
     setFields((ps) => {
@@ -256,7 +241,7 @@ const NewStore = (props: Props) => {
       </div>
       <div className="flex flex-col space-y-2">
         <label htmlFor="Store">
-          Solana Address (If its blank, user's ethereum address will be user)
+          Solana Address (If its blank, user's solana address will be user)
         </label>
         <input
           type="text"
