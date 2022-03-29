@@ -255,7 +255,12 @@ const PaymentCard = ({
               'confirmed'
             )
             console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
-            if(!a) {a = true; var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())}
+            if(!a) {
+              a = true; 
+              var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())
+              toast.success('Payment Successful')
+              setIsModalOpen(false)
+            }
             clearInterval(interval)
             resolve(signatureInfo)
           } catch (error: any) {
@@ -353,7 +358,12 @@ const PaymentCard = ({
               'confirmed'
             )
             console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
-            if(!a) {a = true; var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())}
+            if(!a) {
+              a = true; 
+              var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())
+              toast.success('Payment Successful')
+              setIsModalOpen(false)
+            }
             clearInterval(interval)
             resolve(signatureInfo)
           } catch (error: any) {
@@ -398,7 +408,6 @@ const PaymentCard = ({
         console.error('❌ Payment failed', error)
       }
     }
-    setIsModalOpen(true)
   }
 
   const pay = async () => {

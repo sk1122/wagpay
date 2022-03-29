@@ -97,14 +97,7 @@ const NewStore = (props: Props) => {
         product_values[idx].links = String(value).split(',')
         return product_values
       })
-    } 
-    // else if (field === 'image') {
-    //   setProducts((prevState) => {
-    //     let product_values = [...products]
-    //     product_values[idx].image = value[0] as File
-    //     return product_values
-    //   })
-    // }
+    }
   }
 
   // @ts-ignore
@@ -163,6 +156,21 @@ const NewStore = (props: Props) => {
     props.setIsOpen(false)
     setTweet(`https://wagpay.xyz/${props.username}/${slug}`)
     setStoreSuccess(true)
+  }
+  const removeField = (idx: number) => {
+    setFields((ps) => {
+      let newFields = [...fields]
+      newFields.splice(idx, 1)
+      return newFields
+    })
+  }
+
+  const removeProduct = (idx: number) => {
+    setProducts((ps) => {
+      let newProducts = [...products]
+      newProducts.splice(idx, 1)
+      return newProducts
+    })
   }
 
   const removeField = (idx: number) => {
