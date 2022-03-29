@@ -237,7 +237,7 @@ const NewStore = (props: Props) => {
       </div>
       <div className="flex flex-col space-y-2">
         <label htmlFor="Store">
-          Solana Address (If its blank, user's ethereum address will be user)
+          Solana Address (If its blank, user's solana address will be user)
         </label>
         <input
           type="text"
