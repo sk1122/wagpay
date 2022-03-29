@@ -21,6 +21,7 @@ import {
   PlusIcon,
   MinusIcon
 } from '@heroicons/react/solid'
+import useTransactions from '../../hooks/useTransactions'
 
 interface Page {
   id: number
@@ -43,30 +44,20 @@ interface Props {
 }
 
 export const getServerSideProps = async (context: any) => {
-  try {
     const res = await fetch(
-      `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
+      `http://localhost:2000/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
     )
-    console.log(
-      `https://wagpay.xyz/api/pages/${context.params.store}?username=${context.params.username}`
-    )
+    console.log(res)
     const store: Page = await res.json()
     return {
       props: {
         store: store,
       },
     }
-  } catch (e) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: `/claim?username=${context.params.username}`,
-      },
-    }
-  }
 }
 
 const Store = ({ store }: Props) => {
+  console.log(store)
   const { query } = useRouter()
 
   const updateVisit = async () => {
@@ -78,6 +69,8 @@ const Store = ({ store }: Props) => {
       }
     )
   }
+  
+  const [transactions, getTransactions, createTransaction] = useTransactions()
 
   useEffect(() => {
     updateVisit()
@@ -150,34 +143,6 @@ const Store = ({ store }: Props) => {
     await Promise.all(promise)
     setTotalPrice(totalValue)
     setSelectedProducts(unique)
-  }
-
-  const createTransaction = async (
-    email: string,
-    fields: any,
-    eth: string,
-    sol: string,
-    currency: string,
-    txHash: string
-  ) => {
-    const transaction = {
-      email: email,
-      fields: fields,
-      eth_address: eth,
-      sol_address: sol,
-      page_id: store.id,
-      products: selectedProducts.map((value) => value.id),
-      transaction_hash: txHash,
-      currency: currency
-    }
-
-    const data = await fetch('/api/submissions/create', {
-      method: 'POST',
-      body: JSON.stringify(transaction),
-    })
-    const res = await data.json()
-
-    return res.id
   }
 
   const updateTransaction = async (
@@ -318,11 +283,6 @@ const Store = ({ store }: Props) => {
               {store && store.products.map((product, productIdx) => (
                 <>
                 <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
-<<<<<<< HEAD
-                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
-                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
-=======
->>>>>>> c65086960d2bf6fdfaff0b5542f44ee11a6e15c8
                 </>
               ))}
             </ul>
@@ -345,6 +305,7 @@ const Store = ({ store }: Props) => {
               merchantSOL={store.sol_address as string}
               setIsModalOpen={setIsModalOpen}
               setQrCode={setQrCode}
+              selectedProducts={selectedProducts}
             />
           </section>
         </div>

@@ -35,14 +35,15 @@ import WalletConnectProvider from '@walletconnect/web3-provider'
 import Authereum from 'authereum'
 
 import { Switch } from '@headlessui/react'
+import useTransactions from '../hooks/useTransactions'
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
-type supported_currencies = 'ETH' | 'SOL' | 'USDC (Ethereum)' | 'USDC (Solana)'
+type supported_currencies = 'ethereum' | 'solana' | 'USDC (Ethereum)' | 'USDC (Solana)'
 
 const currencies = [
 	{
-		symbol: 'ETH',
+		symbol: 'ethereum',
 		name: 'Ethereum',
 		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
 	},
@@ -52,7 +53,7 @@ const currencies = [
 		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
 	},
 	{
-		symbol: 'SOL',
+		symbol: 'solana',
 		name: 'Solana',
 		wallets: ['Phantom']
 	},
@@ -74,6 +75,7 @@ interface Props {
   updateTransaction: Function
   setURL: Function
   accepted_currencies: any
+  selectedProducts: any
 }
 
 const CrossIcon = () => {
@@ -106,6 +108,8 @@ const PaymentCard = ({
   merchantSOL,
   setQrCode,
   totalPrice,
+  storeId,
+  selectedProducts
 }: Props) => {
   const { query } = useRouter()
 	useEffect(() => {
@@ -114,11 +118,6 @@ const PaymentCard = ({
       setEmail(query.email as string)
     }
 	}, [])
-
-  const [{ data: connectData, error: connectError }, connect] = useConnect()
-  const [{ data: accountData }, disconnect] = useAccount({
-    fetchEns: true,
-  })
 
   const connectSOL = async () => {
     try {
@@ -159,14 +158,10 @@ const PaymentCard = ({
   const [email, setEmail] = useState('')
   const [eth, setETH] = useState('')
   const [sol, setSOL] = useState('')
-  const [option, setOption] = useState<supported_currencies>('ETH')
+  const [option, setOption] = useState<supported_currencies>(accepted_currencies[0])
   const [wallet, setWallet] = useState('Metamask')
   const [price, setPrice] = useState(0)
   const [fieldValues, setFieldValues] = useState<any[]>(fields)
-
-  useEffect(() => {
-    if (accountData && accountData.address) setETH(accountData.address)
-  }, [accountData])
 
   useEffect(() => console.log(eth), [eth])
   useEffect(() => console.log(sol), [sol])
@@ -199,7 +194,7 @@ const PaymentCard = ({
         {}
       )
       setQrCode(qrCode.dataURL)
-    } else if (option.toLowerCase() === 'sol') {
+    } else if (option.toLowerCase() === 'solana') {
       const connection = new Connection(clusterApiUrl('devnet'))
 
       console.log('2.  a customer checkout \n')
@@ -256,8 +251,8 @@ const PaymentCard = ({
             )
             console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
             if(!a) {
-              a = true; 
-              var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())
+              a = true;
+              var txId = await createTransaction(email, fields, '', '', 'solana', signatureInfo.signature.toString(), storeId, selectedProducts, totalPrice)
               toast.success('Payment Successful')
               setIsModalOpen(false)
             }
@@ -360,7 +355,7 @@ const PaymentCard = ({
             console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
             if(!a) {
               a = true; 
-              var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString())
+              var txId = await createTransaction(email, fields, '', '', 'SOL', signatureInfo.signature.toString(), storeId, selectedProducts, totalPrice)
               toast.success('Payment Successful')
               setIsModalOpen(false)
             }
@@ -422,7 +417,7 @@ const PaymentCard = ({
       return
     }
 
-    if (option.toLowerCase() === 'sol') {
+    if (option.toLowerCase() === 'solana') {
       var toastIdTransact
       try {
         const toastIdConnect = toast.loading('Connecting Solana Wallet')
@@ -434,7 +429,7 @@ const PaymentCard = ({
           return
         }
         const solProvider = window.solana
-        const solConnection = new Connection(clusterApiUrl('mainnet-beta'))
+        const solConnection = new Connection(clusterApiUrl('devnet'))
         toast.dismiss(toastIdConnect)
         toast.success('Successfully Connected Phantom')
 
@@ -461,24 +456,28 @@ const PaymentCard = ({
           signed.serialize()
         )
         await solConnection.confirmTransaction(signature)
-
+        console.log(totalPrice, "totalPrice")
         var txId = await createTransaction(
           email,
           fields,
           '',
-          solProvider.publicKey,
-          signature
+          solProvider.publicKey.toString(),
+          'solana',
+          signature,
+          storeId, 
+          selectedProducts,
+          totalPrice
         )
         toast.dismiss(toastIdTransact)
         toast.success('Successfully Sent Transaction')
 
         return signature
       } catch (e) {
-        await updateTransaction(txId, false, '')
+        console.log(e)
         toast.dismiss(toastIdTransact)
         toast.error('Transaction not successful')
       }
-    } else if (option.toLowerCase() === 'eth') {
+    } else if (option.toLowerCase() === 'ethereum') {
       var toastTransact, toastConnect
 
       toastConnect = toast.loading('Connecting Ethereum Wallet')
@@ -505,7 +504,7 @@ const PaymentCard = ({
           value: ethers.utils.parseEther(price.toFixed(5)),
         })
 
-        var txId = await createTransaction(email, fields, address, '', 'ETH', tx.hash)
+        var txId = await createTransaction(email, fields, address, '', 'ethereum', tx.hash, storeId, selectedProducts, totalPrice)
         toast.dismiss(toastTransact)
         toast.success('Successfully sent Transaction')
         return tx
@@ -543,7 +542,6 @@ const PaymentCard = ({
           erc20abi,
           signer
         )
-        console.log(price.toFixed(5))
         let tx = await erc20contract.transfer(
           merchantETH,
           ethers.utils.parseUnits(price.toString(), 6)
@@ -556,7 +554,7 @@ const PaymentCard = ({
         await tx.wait()
         toast.dismiss(toastTransact)
         toast.success('Transaction Succesful')
-        var txId = await createTransaction(email, fields, address, '', 'USDCETH', tx.hash)
+        var txId = await createTransaction(email, fields, address, '', 'usdceth', tx.hash, storeId, selectedProducts, totalPrice)
         console.log(tx)
       } catch (e) {
         toast.dismiss(toastTransact)
@@ -620,20 +618,20 @@ const PaymentCard = ({
 
       await solConnection.confirmTransaction(transactionSignature)
       
-      const tx = await createTransaction(email, fields, '', solProvider.publicKey, 'USDCSOL', transactionSignature)
+      const tx = await createTransaction(email, fields, '', solProvider.publicKey, 'usdcsol', transactionSignature, storeId, selectedProducts, totalPrice)
 
       toast.dismiss(toastIdTransact)
     }
   }
 
   useEffect(() => {
-    if (option.toLowerCase() == 'eth') {
+    if (option.toLowerCase() == 'ethereum') {
       fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
       )
         .then((data) => data.json())
         .then((res) => setPrice(totalPrice / Number(res.ethereum.usd)))
-    } else if (option.toLowerCase() == 'sol') {
+    } else if (option.toLowerCase() == 'solana') {
       fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
       )
@@ -863,14 +861,15 @@ const PaymentCard = ({
                   <p>${totalPrice}</p>{' '}
                   <p>
                     ~{price.toFixed(2)}{' '}
-                    {option.toLowerCase() === 'eth'
+                    {console.log(option.toLowerCase() === 'solana')}
+                    {option.toLowerCase() === 'ethereum'
                       ? 'ETH'
-                      : option.toLowerCase() === 'sol'
+                      : option.toLowerCase() === 'solana'
                       ? 'SOL'
                       : 'USDC'}
                   </p>
                 </div>
-                {option.toLowerCase() === 'sol' && (
+                {option.toLowerCase() === 'solana' && (
                   <div
                     onClick={() => qrCode()}
                     className="cursor-pointer rounded-md bg-black px-3 py-2 text-white"

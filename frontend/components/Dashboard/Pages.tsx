@@ -23,6 +23,8 @@ import { useEffect, useState } from 'react'
 import { Product } from '../../pages/api/product'
 import { supabase } from '../../supabase'
 import Link from 'next/link'
+import { Page } from '../../types/Pages'
+import usePages from '../../hooks/usePage'
 
 const statusStyles = {
   success: 'bg-green-100 text-green-800',
@@ -32,22 +34,6 @@ const statusStyles = {
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(' ')
-}
-
-interface Page {
-  id: number
-  title: string
-  logo: string
-  description: string
-  social_links: Object
-  accepted_currencies: string[]
-  terms_conditions: string[]
-  slug: string
-  eth_address?: string
-  sol_address?: string
-  user: number
-  products: Product[]
-  created_data: string
 }
 
 interface Props {
@@ -121,21 +107,7 @@ export const Solana = () => {
 }
 
 const Pages = ({ cards, username }: Props) => {
-  const [pages, setPages] = useState<Page[]>()
-
-  const fetchPages = async () => {
-    const data = await fetch('/api/pages/get', {
-      headers: {
-        'bearer-token': supabase.auth.session()?.access_token as string,
-      },
-    })
-    const res = await data.json()
-    setPages(res)
-  }
-
-  useEffect(() => {
-    fetchPages()
-  }, [])
+  const [pages, getPages] = usePages()
 
   return (
     <div className="mt-8">
@@ -198,8 +170,8 @@ const Pages = ({ cards, username }: Props) => {
           className="mt-2 divide-y divide-gray-200 overflow-hidden shadow sm:hidden"
         >
           {pages &&
-            pages.length > 0 &&
-            pages.map((page) => (
+            pages.data.length > 0 &&
+            pages.data.map((page: Page) => (
               <li key={page.id}>
                 <a
                   href={''}
@@ -284,12 +256,12 @@ const Pages = ({ cards, username }: Props) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {(!pages || pages.length <= 0) && (
+                  {(!pages || pages.data.length <= 0) && (
                     <div>No Pages Available</div>
                   )}
                   {pages &&
-                    pages.length > 0 &&
-                    pages.map((page) => (
+                    pages.data.length > 0 &&
+                    pages.data.map((page: Page) => (
                       <tr key={page.id} className="bg-white">
                         <td className="w-full max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                           <div className="flex">

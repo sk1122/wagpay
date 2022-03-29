@@ -23,6 +23,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase'
 import Link from 'next/link'
 import TransactionModal from './TransactionModal'
+import useTransactions from '../../hooks/useTransactions'
+import { Transaction } from '../../types/Transaction'
 
 const statusStyles = {
   success: 'bg-green-100 text-green-800',
@@ -39,7 +41,7 @@ interface Props {
 }
 
 const Transactions = ({ cards }: Props) => {
-  const [transactions, setTransactions] = useState<any[]>([])
+  const [transactions, getTransactions] = useTransactions()
   const [selectedTransaction, setSelectedTransaction] = useState<any>({})
 
   let [isOpen, setIsOpen] = useState(false)
@@ -53,47 +55,7 @@ const Transactions = ({ cards }: Props) => {
     setIsOpen(true)
   }
 
-  const fetchTransactions = async () => {
-    const res = await fetch('/api/submissions/get', {
-      headers: {
-        'bearer-token': supabase.auth.session()?.access_token as string,
-      },
-    })
-    const data = await res.json()
-    // setTransactions(data)
-
-    for (let j = 0; j < data.length; j++) {
-      const value = data[j]
-      const products = value.products
-      if (!data[j].total_prices) data[j].total_prices = 0
-      var total_price = 0
-      for (let i = 0; i < products.length; i++) {
-        const ress = await fetch(
-          `/api/products/${products[i]}`
-        )
-        const res = await ress.json()
-
-        data[j].products[i] = res
-        total_price += res.discounted_price
-      }
-
-      const ress = await fetch(
-        `/api/pages/id?id=${data[j].page_id}`
-      )
-      const res = await ress.json()
-      data[j].page_id = res
-
-      data[j].total_prices = total_price
-    }
-    setTransactions(data)
-  }
-
-  useEffect(() => {
-    console.log('122')
-    fetchTransactions()
-  }, [])
-
-  // useEffect(() => console.log(transactions), [transactions])
+  useEffect(() => getTransactions(), [])
 
   return (
     <div className="mt-8">
@@ -156,7 +118,7 @@ const Transactions = ({ cards }: Props) => {
           className="mt-2 divide-y divide-gray-200 overflow-hidden shadow sm:hidden"
         >
           {transactions &&
-            transactions.map((transaction: any) => (
+            transactions.data.map((transaction: Transaction) => (
               <li key={transaction.id}>
                 <a
                   // href={transaction.href}
@@ -169,7 +131,7 @@ const Transactions = ({ cards }: Props) => {
                         aria-hidden="true"
                       />
                       <span className="flex flex-col truncate text-sm text-gray-500">
-                        <span className="truncate">{transaction.name}</span>
+                        <span className="truncate">{transaction.email}</span>
                         <span>
                           <span className="font-medium text-gray-900">
                             {transaction.total_prices}
@@ -238,8 +200,8 @@ const Transactions = ({ cards }: Props) => {
                     <div>No Transactions Available</div>
                   )}
                   {transactions &&
-                    transactions.length > 0 &&
-                    transactions.map((transaction: any) => (
+                    transactions.data.length > 0 &&
+                    transactions.data.map((transaction: Transaction) => (
                       <tr key={transaction.id} className="bg-white">
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
                           {transaction.id}
@@ -257,9 +219,9 @@ const Transactions = ({ cards }: Props) => {
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
-                          {transaction.page_id && (
-                            <Link href={`${transaction.page_id.slug}`}>
-                              {transaction.page_id.title}
+                          {transaction.page && (
+                            <Link href={`/${transaction.page.slug}`}>
+                              {transaction.page.title}
                             </Link>
                           )}
                         </td>

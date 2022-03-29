@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 
 import StoreSuccess from './StoreSuccess'
 import { uploadFile } from '../../pages/api/pages/create'
+import usePages from '../../hooks/usePage'
 
 type supported_currencies = 'Ethereum' | 'Solana'
 
@@ -36,6 +37,8 @@ const supported_currencies = [{name: 'Ethereum', symbol: 'ethereum'}, {name: 'So
 const supported_types = ['text', 'number']
 
 const NewStore = (props: Props) => {
+  const [pages, getPages, createPage] = usePages()
+  
   const [products, setProducts] = useState<Product[]>([])
   const [fields, setFields] = useState<Field[]>([])
 
@@ -120,25 +123,18 @@ const NewStore = (props: Props) => {
 
     const toastId = toast.loading('Creating Store')
     try {
-      var data = await fetch('http://localhost:2000/api/pages/', {
-        method: 'POST',
-        body: JSON.stringify({
-          title: title,
-          logo: logo,
-          description: description,
-          social_links: socialLinks,
-          accepted_currencies: currencies,
-          slug: slug,
-          eth_address: eth,
-          sol_address: sol,
-          visits: 0,
-          products: {create: products},
-          fields: fields,
-        }),
-        headers: {
-          'bearer-token': supabase.auth.session()?.access_token as string,
-          'Content-Type': 'application/json'
-        },
+      await createPage({
+        title: title,
+        logo: logo,
+        description: description,
+        social_links: socialLinks,
+        accepted_currencies: currencies,
+        slug: slug,
+        eth_address: eth,
+        sol_address: sol,
+        visits: 0,
+        products: {create: products},
+        fields: fields,
       })
     } catch (e) {
       props.setIsOpen(false)
@@ -146,8 +142,6 @@ const NewStore = (props: Props) => {
       toast.error("Can't create a store")
       return
     }
-
-    const res = await data.json()
 
     // uploadFile(logo as File, `${res.id}/logo.png`)
 

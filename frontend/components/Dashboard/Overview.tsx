@@ -22,7 +22,10 @@ import {
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase'
 import Link from 'next/link'
-import { Product } from '../../pages/api/product'
+import usePages from '../../hooks/usePage'
+import { Page } from 'Pages'
+import useTransactions from '../../hooks/useTransactions'
+import { Transaction } from '../../types/Transaction'
 
 const statusStyles = {
   success: 'bg-green-100 text-green-800',
@@ -32,22 +35,6 @@ const statusStyles = {
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(' ')
-}
-
-interface Page {
-  id: number
-  title: string
-  logo: string
-  description: string
-  social_links: Object
-  accepted_currencies: string[]
-  terms_conditions: string[]
-  slug: string
-  eth_address?: string
-  sol_address?: string
-  user: number
-  products: Product[]
-  created_data: string
 }
 
 export const Ethereum = () => {
@@ -121,62 +108,10 @@ interface Props {
 }
 
 const Overview = ({ cards, username }: Props) => {
-  const [transactions, setTransactions] = useState<any[]>([])
+  const [transactions, getTransactions] = useTransactions()
+  const [pages, getPages] = usePages()
 
-  const fetchTransactions = async () => {
-    const res = await fetch('/api/submissions/limit', {
-      headers: {
-        'bearer-token': supabase.auth.session()?.access_token as string,
-      },
-    })
-    const data = await res.json()
-
-    for (let j = 0; j < data.length; j++) {
-      const value = data[j]
-      const products = value.products
-      if (!data[j].total_prices) data[j].total_prices = 0
-      var total_price = 0
-      for (let i = 0; i < products.length; i++) {
-        const ress = await fetch(
-          `/api/products/${products[i]}`
-        )
-        const res = await ress.json()
-
-        data[j].products[i] = res
-        total_price += res.discounted_price
-      }
-
-      const ress = await fetch(
-        `https://wagpay.xyz/api/pages/id?id=${data[j].page_id}`
-      )
-      const res = await ress.json()
-      data[j].page_id = res
-
-      data[j].total_prices = total_price
-    }
-    setTransactions(data)
-  }
-
-  useEffect(() => {
-    console.log('122')
-    fetchTransactions()
-  }, [])
-
-  const [pages, setPages] = useState<Page[]>([])
-
-  const fetchPages = async () => {
-    const data = await fetch('/api/pages/get', {
-      headers: {
-        'bearer-token': supabase.auth.session()?.access_token as string,
-      },
-    })
-    const res = await data.json()
-    setPages(res)
-  }
-
-  useEffect(() => {
-    fetchPages()
-  }, [])
+  useEffect(() => getTransactions(), [])
 
   return (
     <div className="mt-8">
@@ -240,40 +175,41 @@ const Overview = ({ cards, username }: Props) => {
         >
           {transactions &&
             transactions.length > 0 &&
-            transactions.map((transaction) => (
-              <li key={transaction.id}>
-                <a
-                  href={transaction.href}
-                  className="block bg-white px-4 py-4 hover:bg-gray-50"
-                >
-                  <span className="flex items-center space-x-4">
-                    <span className="flex flex-1 space-x-2 truncate">
-                      <CashIcon
-                        className="h-5 w-5 flex-shrink-0 text-gray-400"
-                        aria-hidden="true"
-                      />
-                      <span className="flex flex-col truncate text-sm text-gray-500">
-                        <span className="truncate">
-                          {transaction.productName}
-                        </span>
-                        <span>
-                          <span className="font-medium text-gray-900">
-                            {transaction.amount}
-                          </span>{' '}
-                          {transaction.currency}
-                        </span>
-                        <time dateTime={transaction.datetime}>
-                          {transaction.date}
-                        </time>
-                      </span>
-                    </span>
-                    <ChevronRightIcon
-                      className="h-5 w-5 flex-shrink-0 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </a>
-              </li>
+            transactions.map((transaction: Transaction) => (
+              // <li key={transaction.id}>
+              //   <a
+              //     href={transaction.href}
+              //     className="block bg-white px-4 py-4 hover:bg-gray-50"
+              //   >
+              //     <span className="flex items-center space-x-4">
+              //       <span className="flex flex-1 space-x-2 truncate">
+              //         <CashIcon
+              //           className="h-5 w-5 flex-shrink-0 text-gray-400"
+              //           aria-hidden="true"
+              //         />
+              //         <span className="flex flex-col truncate text-sm text-gray-500">
+              //           <span className="truncate">
+              //             {transaction.productName}
+              //           </span>
+              //           <span>
+              //             <span className="font-medium text-gray-900">
+              //               {transaction.amount}
+              //             </span>{' '}
+              //             {transaction.currency}
+              //           </span>
+              //           <time dateTime={transaction.datetime}>
+              //             {transaction.date}
+              //           </time>
+              //         </span>
+              //       </span>
+              //       <ChevronRightIcon
+              //         className="h-5 w-5 flex-shrink-0 text-gray-400"
+              //         aria-hidden="true"
+              //       />
+              //     </span>
+              //   </a>
+              // </li>
+              <li></li>
             ))}
         </ul>
 
@@ -328,8 +264,8 @@ const Overview = ({ cards, username }: Props) => {
                     <div>No Transactions Available</div>
                   )}
                   {transactions &&
-                    transactions.length > 0 &&
-                    transactions.map((transaction: any) => (
+                    transactions.data.length > 0 &&
+                    transactions.data.map((transaction: Transaction) => (
                       <tr key={transaction.id} className="bg-white">
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
                           {transaction.id}
@@ -347,8 +283,8 @@ const Overview = ({ cards, username }: Props) => {
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
-                          <Link href={`/${username}${transaction.page_id.slug}`}>
-                            {transaction.page_id.title}
+                          <Link href={`/${username}/${transaction.page.slug as string}`}>
+                            {transaction.page.title}
                           </Link>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
@@ -467,13 +403,14 @@ const Overview = ({ cards, username }: Props) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {(!pages || pages.length <= 0) && (
+                  {(!pages || pages.data.length <= 0) && (
                     <div>No Pages Available</div>
                   )}
                   {pages &&
-                    pages.length > 0 &&
-                    pages.map((page) => (
+                    pages.data.length > 0 &&
+                    pages.data.map((page: Page) => (
                       <tr key={page.id} className="bg-white">
+                        {console.log(pages)}
                         <td className="w-full max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                           <div className="flex">
                             <Link href={`/${username}/${page.slug}`}>
@@ -493,8 +430,10 @@ const Overview = ({ cards, username }: Props) => {
                         <td className="flex space-x-3 whitespace-nowrap px-8 pt-3 text-sm text-gray-500">
                           {page.accepted_currencies.map((currency) => (
                             <span className="font-medium text-gray-900">
-                              {currency === 'ETH' && <Ethereum />}
-                              {currency === 'SOL' && <Solana />}
+                              {currency === 'ethereum' && <Ethereum />}
+                              {currency === 'solana' && <Solana />}
+                              {currency === 'usdcsol' && <Solana />}
+                              {currency === 'usdceth' && <Ethereum />}
                             </span>
                           ))}
                         </td>
