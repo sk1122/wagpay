@@ -31,7 +31,7 @@ interface Field {
 type _fields = 'name' | 'type'
 type _products = 'discounted_price' | 'price' | 'name' | 'description' | 'links' | 'image'
 
-const supported_currencies = [{name: 'Ethereum', symbol: 'ethereum'}, {name: 'Solana', symbol: "solana"}, {name: 'USDC (Solana)', symbol: 'usdcsol'}, {name: 'USDC (Ethereum)', symbol: 'usdceth'}]
+const supported_currencies = [{name: 'Ethereum', symbol: 'ETH'}, {name: 'Solana', symbol: "SOL"}, {name: 'USDC (Solana)', symbol: 'usdcsol'}, {name: 'USDC (Ethereum)', symbol: 'usdceth'}]
 
 const supported_types = ['text', 'number']
 
