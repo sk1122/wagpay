@@ -347,7 +347,7 @@ const Overview = ({ cards, username }: Props) => {
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
-                          <Link href={`/${username}${transaction.page_id.slug}`}>
+                          <Link href={`/${username}/${transaction.page_id.slug}`}>
                             {transaction.page_id.title}
                           </Link>
                         </td>
