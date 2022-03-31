@@ -14,10 +14,10 @@ interface Submission {
 	sol_address?: string
 	products: number[]
 	page_id: number
+	transaction_hash: string
 }
 
 async function create(req: NextApiRequest, res: NextApiResponse<Submission | string>) {
-	
 	if(req.method === 'POST') {
 		const submissionData = JSON.parse(req.body) as Submission
 		let { ...submission } = submissionData

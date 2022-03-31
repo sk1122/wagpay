@@ -417,6 +417,7 @@ const PaymentCard = ({
     }
 
     if (option.toLowerCase() === 'sol') {
+      console.log('soolsoll')
       var toastIdTransact
       try {
         const toastIdConnect = toast.loading('Connecting Solana Wallet')
@@ -428,7 +429,7 @@ const PaymentCard = ({
           return
         }
         const solProvider = window.solana
-        const solConnection = new Connection(clusterApiUrl('mainnet-beta'))
+        const solConnection = new Connection(clusterApiUrl('devnet'))
         toast.dismiss(toastIdConnect)
         toast.success('Successfully Connected Phantom')
 
@@ -461,14 +462,15 @@ const PaymentCard = ({
           fields,
           '',
           solProvider.publicKey,
-          signature
+          'sol',
+          signature.toString()
         )
         toast.dismiss(toastIdTransact)
         toast.success('Successfully Sent Transaction')
 
         return signature
       } catch (e) {
-        await updateTransaction(txId, false, '')
+        // await updateTransaction(txId, false, '')
         toast.dismiss(toastIdTransact)
         toast.error('Transaction not successful')
       }

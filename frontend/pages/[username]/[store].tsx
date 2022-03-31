@@ -36,6 +36,7 @@ interface Page {
   user: number
   products: ProductInterface[]
   fields: any[]
+  webhook_urls: string[]
 }
 
 interface Props {
@@ -170,12 +171,28 @@ const Store = ({ store }: Props) => {
       transaction_hash: txHash,
       currency: currency
     }
+    console.log(transaction, "DADA")
 
     const data = await fetch('/api/submissions/create', {
       method: 'POST',
       body: JSON.stringify(transaction),
     })
     const res = await data.json()
+
+    if(txHash) {
+      if(store.webhook_urls) {
+        console.log(store.webhook_urls)
+        store.webhook_urls.map(value => {
+          fetch(value, {
+            method: 'POST',
+            body: JSON.stringify({'content': JSON.stringify(transaction)}),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+        })
+      }
+    }
 
     return res.id
   }
