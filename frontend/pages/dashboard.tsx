@@ -24,6 +24,9 @@ import { User } from './api/userType'
 import PageHeader from '../components/Dashboard/PageHeader'
 import { useRouter } from 'next/router'
 import * as blockies from 'ethereum-blockies-png'
+import useProducts from '../hooks/useProducts'
+import { useTransaction } from 'wagmi'
+import useTransactions from '../hooks/useTransactions'
 
 const navigation = [
   { name: 'Overview', comp_name: 'overview', icon: HomeIcon, current: true },
@@ -111,6 +114,9 @@ function classNames(...classes: any) {
 export default function Dashboard() {
   const { push } = useRouter()
 
+  const [products, getProducts, createProducts, total_sold, totalSold] = useProducts()
+  const [transactions, getTransactions, createTransaction, totalEarned] = useTransactions()
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [currentTab, setCurrentTab] = useState('overview')
   const [user, setUser] = useState<User>({} as User)
@@ -144,31 +150,18 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => console.log(running, 'running'), [running])
+  useEffect(() => total_sold(), [])
 
   const getMoneyEarned = async () => {
     if (running) {
-      console.log(supabase.auth.session()?.access_token as string, "SESSION")
-      const data = await fetch('/api/products/money_earned', {
-        headers: {
-          'bearer-token': supabase.auth.session()?.access_token as string,
-        },
-      })
-      const res = await data.json()
-      cards[2].amount = '$' + res
-      setMoney('$' + res)
+      cards[2].amount = '$' + totalEarned
     }
   }
 
   const totalProductSold = async () => {
     if (running) {
-      const data = await fetch('/api/products/product_sold', {
-        headers: {
-          'bearer-token': supabase.auth.session()?.access_token as string,
-        },
-      })
-      const res = await data.json()
-      cards[1].amount = res
-      setSold(res)
+      console.log(totalSold)
+      cards[1].amount = totalSold
     }
   }
 
@@ -206,7 +199,7 @@ export default function Dashboard() {
       totalVisits()
       totalPages()
     }
-  }, [running])
+  }, [running, totalSold, totalEarned])
 
   const changeTab = (nextTab: string, nextId: number) => {
     const index = navigation

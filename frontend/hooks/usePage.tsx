@@ -37,6 +37,8 @@ const usePages = () => {
 
 		const res = await data.json()
 
+		getPages()
+
 		return res
 	}
 

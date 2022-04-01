@@ -4,15 +4,20 @@ import { Transactions } from "../types/Transaction"
 
 const useTransactions = () => {
 	const [transactions, setTransactions] = useState<Transactions>({ cursor: 0, data: [] } as Transactions)
+	const [totalEarned, setTotalEarned] = useState(0)
 
-	async function getTransactions() {
-		const data = await fetch('http://localhost:2000/api/submissions/', {
+	async function getTransactions(cursor?: number) {
+		const data = await fetch(`http://localhost:2000/api/submissions/?cursor=${cursor?.toString()}`, {
 			headers: {
 				'bearer-token': supabase.auth.session()?.access_token as string,
 			},
 		})
 		const res = await data.json()
-		setTransactions(res)
+
+		console.log(res, "RES")
+
+		if(res.data.length <= 0) {console.log('dsa');setTransactions({ cursor: 0, data: [{}] } as Transactions)}
+		else setTransactions(res)
 	}
 
 	async function createTransaction(
@@ -38,8 +43,6 @@ const useTransactions = () => {
 		  total_prices: total_prices
 		}
 
-		console.log(transaction, "R")
-	
 		const data = await fetch('http://localhost:2000/api/submissions/', {
 		  method: 'POST',
 		  body: JSON.stringify(transaction),
@@ -47,14 +50,27 @@ const useTransactions = () => {
 			  'Content-Type': 'application/json'
 		  }
 		})
+
 		let res = await data.json()
 
 		return res.id
-	  }
+	}
 
-	// useEffect(() => getTransactions() as any, [])
+	async function getTotalEarned() {
+		const data = await fetch('http://localhost:2000/api/submissions/total_earned', {
+		  headers: {
+			'bearer-token': supabase.auth.session()?.access_token as string,
+			'Content-Type': 'application/json'
+		  }
+		})
+		let res = await data.json()
 
-	return [transactions, getTransactions, createTransaction] as any
+		setTotalEarned(res._sum.total_prices)
+	}
+
+	useEffect(() => getTotalEarned() as any, [])
+
+	return [transactions, getTransactions, createTransaction, totalEarned] as any
 }
 
 export default useTransactions

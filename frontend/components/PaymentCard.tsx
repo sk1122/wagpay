@@ -159,12 +159,12 @@ const PaymentCard = ({
   const [eth, setETH] = useState('')
   const [sol, setSOL] = useState('')
   const [option, setOption] = useState<supported_currencies>(accepted_currencies[0])
-  const [wallet, setWallet] = useState('Metamask')
+  console.log(accepted_currencies)
+  const [wallet, setWallet] = useState(currencies.find(currency => currency.name.toLowerCase() === accepted_currencies[0])?.wallets[0])
   const [price, setPrice] = useState(0)
   const [fieldValues, setFieldValues] = useState<any[]>(fields)
 
-  useEffect(() => console.log(eth), [eth])
-  useEffect(() => console.log(sol), [sol])
+  useEffect(() => console.log(option, wallet), [option, wallet])
 
   const checkIfAllFilled = () => {
     for (let i = 0; i < fields.length; i++) {
@@ -830,6 +830,7 @@ const PaymentCard = ({
                 <select
                   className="relative block w-full rounded-md border-gray-300 bg-transparent focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   aria-label="Default select example"
+                  value={option}
                   onChange={(e) =>
                     setOption(e.target.value as supported_currencies)
                   }

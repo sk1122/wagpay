@@ -44,16 +44,19 @@ interface Props {
 }
 
 export const getServerSideProps = async (context: any) => {
+  try {
     const res = await fetch(
       `http://localhost:2000/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
     )
-    console.log(res)
     const store: Page = await res.json()
     return {
       props: {
         store: store,
       },
     }
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 const Store = ({ store }: Props) => {
