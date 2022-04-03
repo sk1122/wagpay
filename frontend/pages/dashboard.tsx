@@ -1,8 +1,8 @@
 import Overview from '../components/Dashboard/Overview'
 import Pages from '../components/Dashboard/Pages'
 import Transactions from '../components/Dashboard/Transactions'
-import Products from '../components/Dashboard/Products'
-import Settings from '../components/Dashboard/Settings'
+import Products from '../components/Dashboard/Products';
+import Invoices from '../components/Dashboard/invoices';
 import { Fragment, useEffect, useLayoutEffect, useState } from 'react'
 import { Dialog, Menu, Transition } from '@headlessui/react'
 import {
@@ -37,13 +37,13 @@ const navigation = [
     icon: ShoppingCartIcon,
     current: false,
   },
+  { name: 'Invoices', comp_name: 'invoices', icon: CogIcon, current: false },
   {
     name: 'Transactions',
     comp_name: 'transactions',
     icon: CreditCardIcon,
     current: false,
   },
-  { name: 'Settings', comp_name: 'settings', icon: CogIcon, current: false },
 ]
 
 const secondaryNavigation = [
@@ -63,49 +63,6 @@ const cards = [
   { name: 'Pages', href: '#', icon: CollectionIcon, amount: '0' },
   // More items...
 ]
-
-const transactions = [
-  {
-    id: 1,
-    productName: '2 Kg Ganja',
-    pageName: 'Page Name',
-    href: '#',
-    amount: '$20,000',
-    currency: 'USD',
-    status: 'success',
-    date: 'July 11, 2020',
-    datetime: '2020-07-11',
-  },
-  {
-    id: 2,
-    productName: '2 Kg Ganja',
-    pageName: 'Page Name',
-    href: '#',
-    amount: '$20,000',
-    currency: 'USD',
-    status: 'success',
-    date: 'July 11, 2020',
-    datetime: '2020-07-11',
-  },
-  {
-    id: 3,
-    productName: '2 Kg Ganja',
-    pageName: 'Page Name',
-    href: '#',
-    amount: '$20,000',
-    currency: 'USD',
-    status: 'success',
-    date: 'July 11, 2020',
-    datetime: '2020-07-11',
-  },
-  // More transactions...
-]
-
-const statusStyles = {
-  success: 'bg-green-100 text-green-800',
-  processing: 'bg-yellow-100 text-yellow-800',
-  failed: 'bg-gray-100 text-gray-800',
-}
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(' ')
@@ -140,13 +97,13 @@ export default function Dashboard() {
         push('/auth')
         return
       }
-      console.log('user2')
+      console.log('user2', supabase.auth.session()?.access_token)
+      setRunning(true)
     } catch (e) {
       push('/auth')
       console.log('not logged in')
       return
     }
-    setRunning(true)
   }, [])
 
   useEffect(() => console.log(running, 'running'), [running])
@@ -477,14 +434,12 @@ export default function Dashboard() {
           </div>
           <main className="flex-1 pb-8">
             {/* Page header */}
-            <PageHeader user={user} />
+            <PageHeader user={user} currentTab={currentTab} />
             {currentTab === 'overview' && <Overview cards={cards} username={user.username} />}
             {currentTab === 'pages' && <Pages cards={cards} username={user.username} />}
+            {currentTab === 'invoices' && <Invoices cards={cards} />}
             {currentTab === 'transactions' && <Transactions cards={cards} />}
             {currentTab === 'products' && <Products cards={cards} />}
-            {/* {currentTab === 'settings' && (
-              <Settings cards={cards} transactions={transactions} />
-            )} */}
           </main>
         </div>
       </div>

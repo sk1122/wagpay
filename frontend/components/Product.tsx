@@ -73,7 +73,8 @@ const Product = (props: Props) => {
 							aria-hidden="true"
 						/>
 						</button>
-						<p className="text-white">{noProducts}</p>
+						{/* @ts-ignore */}
+						<p className="text-white">{noProducts | props.product.quantity}</p>
 						<button
 						type="button"
 						className="-m-2 inline-flex p-2 text-gray-400 hover:text-gray-500"
@@ -92,7 +93,7 @@ const Product = (props: Props) => {
 			<p className="mt-4 flex flex-col space-y-2 text-sm text-gray-200">
 				<span>{props.product.description}</span>
 				<div className="flex flex-col space-y-3">
-					{props.product.links.map(value => (
+					{props && props.product && props.product.links && props.product.links.map(value => (
 		 				<a href={value} className="text-xs white underline">{value}</a>
 		 			))}
 		 		</div>
