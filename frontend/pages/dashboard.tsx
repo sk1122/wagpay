@@ -2,7 +2,7 @@ import Overview from '../components/Dashboard/Overview'
 import Pages from '../components/Dashboard/Pages'
 import Transactions from '../components/Dashboard/Transactions'
 import Products from '../components/Dashboard/Products';
-import Invoices from '../components/Dashboard/invoices';
+import Invoices from '../components/Dashboard/Invoices';
 import { Fragment, useEffect, useLayoutEffect, useState } from 'react'
 import { Dialog, Menu, Transition } from '@headlessui/react'
 import {
