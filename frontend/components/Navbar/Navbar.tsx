@@ -7,11 +7,11 @@ import { Fragment } from 'react'
 import { Popover, Transition } from '@headlessui/react'
 import { MenuIcon, XIcon } from '@heroicons/react/outline'
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard' },
-  { name: 'Use Cases', href: '#' },
-  { name: 'Help', href: '#' },
-]
+// const navigation = [
+//   // { name: 'Dashboard', href: '#' },
+//   // { name: 'Use Cases', href: '#' },
+//   // { name: 'Help', href: '#' },
+// ]
 
 const Navbar = () => {
   return (
@@ -33,7 +33,7 @@ const Navbar = () => {
                 </Popover.Button>
               </div>
             </div>
-            <div className="hidden space-x-8 md:ml-10 md:flex">
+            {/* <div className="hidden space-x-8 md:ml-10 md:flex">
               {navigation.map((item) => (
                 <Link href={item.href}>
                   <a
@@ -44,21 +44,21 @@ const Navbar = () => {
                   </a>
                 </Link>
               ))}
-            </div>
+            </div> */}
           </div>
           <div className="hidden md:flex md:items-center md:space-x-6">
-            <Link href='/auth'>
+            {/* <Link href='/'>
               <a
                 className="text-base font-medium text-white hover:text-gray-300"
               >
                 Log in
               </a>
-            </Link>
+            </Link> */}
             <a
-              href="#claim"
+              href="https://0yesqjuxu6v.typeform.com/to/uRmp246z"
               className="inline-flex items-center rounded-md border border-transparent bg-gray-600 px-4 py-2 text-base font-medium text-white hover:bg-gray-700"
             >
-              Sign up
+              Join Waitlist
             </a>
           </div>
         </nav>
@@ -90,7 +90,7 @@ const Navbar = () => {
               </div>
             </div>
             <div className="pt-5 pb-6">
-              <div className="space-y-1 px-2">
+              {/* <div className="space-y-1 px-2">
                 {navigation.map((item) => (
                   <a
                     key={item.name}
@@ -100,25 +100,25 @@ const Navbar = () => {
                     {item.name}
                   </a>
                 ))}
-              </div>
+              </div> */}
               <div className="mt-6 px-5">
                 <a
-                  href="#"
+                  href="https://0yesqjuxu6v.typeform.com/to/uRmp246z"
                   className="hover:to-indigo-600s block w-full rounded-md bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 py-3 px-4 text-center font-medium text-white shadow hover:from-rose-500 hover:via-fuchsia-600"
                 >
-                  Start free trial
+                  Join Waitlist
                 </a>
               </div>
-              <div className="mt-6 px-5">
+              {/* <div className="mt-6 px-5">
                 <p className="text-center text-base font-medium text-gray-500">
                   Existing customer?{' '}
-                  <Link href="/auth">
+                  <Link href="/">
                     <a className="text-gray-900 hover:underline">
                       Login
                     </a>
                   </Link>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </Popover.Panel>

@@ -53,9 +53,9 @@ const features = [
     icon: ViewGridIcon,
   },
   {
-    name: 'Zero Fees & No Credit Card Required',
+    name: 'Pay any token <> Receive any token',
     description:
-      "WagPay doesn't charge any fees to access dashboard or on your cryptocurrency payments",
+      "*Buyers can pay in any token (fiat included) as they wish and merchant will receive in any token (fiat included) that they want!",
     icon: CreditCardIcon,
   },
   {
@@ -278,7 +278,7 @@ const Homepage: React.FC = () => {
                         className="sm:mx-auto sm:max-w-xl lg:mx-0"
                       >
                         <div className="sm:flex">
-                          <div className="min-w-0 flex-1">
+                          {/* <div className="min-w-0 flex-1">
                             <label htmlFor="username" className="sr-only">
                               Email address
                             </label>
@@ -288,14 +288,14 @@ const Homepage: React.FC = () => {
                               placeholder="Email"
                               className="block w-full rounded-md border-0 px-4 py-3 text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900"
                             />
-                          </div>
-                          <div className="mt-3 sm:mt-0 sm:ml-3">
-                            <button
-                              type="submit"
+                          </div> */}
+                          <div className="mt-3 sm:mt-0">
+                            <a
+                              href='https://0yesqjuxu6v.typeform.com/to/uRmp246z'
                               className="block w-full rounded-md bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 py-3 px-6 font-medium text-white shadow hover:from-rose-500 hover:via-fuchsia-600 hover:to-indigo-600 focus:outline-none"
                             >
-                              Claim Username
-                            </button>
+                              Join Waitlist
+                            </a>
                           </div>
                         </div>
                       </form>
@@ -382,7 +382,7 @@ const Homepage: React.FC = () => {
           </div>
 
           {/* Testimonial section */}
-          <div
+          {/* <div
             id="claim"
             className=" bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 pb-16 lg:relative lg:pb-0"
           >
@@ -409,7 +409,7 @@ const Homepage: React.FC = () => {
                         <div className="flex w-full justify-between rounded-xl bg-white  opacity-80">
                           <input
                             type="text"
-                            placeholder="@username"
+                            placeholder="username"
                             className="w-full rounded-xl border-0 py-4 pl-4 text-sm font-semibold opacity-80 outline-none"
                             value={username}
                             onChange={(e: any) => setUsername(e.target.value)}
@@ -472,7 +472,7 @@ const Homepage: React.FC = () => {
             </div>
           </div>
 
-          {/* Blog section */}
+          Blog section
           <div className="relative bg-gray-50 py-16 sm:py-24 lg:py-32">
             <div className="relative">
               <div className="mx-auto max-w-md px-4 text-center sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
@@ -515,7 +515,7 @@ const Homepage: React.FC = () => {
                 ))}
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* CTA Section */}
           <div className="relative bg-gray-900">
@@ -533,7 +533,7 @@ const Homepage: React.FC = () => {
             <div className="relative mx-auto max-w-md px-4 py-12 sm:max-w-7xl sm:px-6 sm:py-20 md:py-28 lg:px-8 lg:py-32">
               <div className="md:ml-auto md:w-1/2 md:pl-10">
                 <h2 className="text-base font-semibold uppercase tracking-wider text-gray-300">
-                  Need Support
+                  Join our community
                 </h2>
                 <p className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
                   We’re here to help
@@ -549,7 +549,7 @@ const Homepage: React.FC = () => {
                       href="https://discord.gg/RjPGhpxs"
                       className="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-5 py-3 text-base font-medium text-gray-900 hover:bg-gray-50"
                     >
-                      Get Help
+                      Discord
                       <ExternalLinkIcon
                         className="-mr-1 ml-3 h-5 w-5 text-gray-400"
                         aria-hidden="true"
