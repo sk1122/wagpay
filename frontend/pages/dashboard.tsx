@@ -1,8 +1,8 @@
 import Overview from '../components/Dashboard/Overview'
 import Pages from '../components/Dashboard/Pages'
 import Transactions from '../components/Dashboard/Transactions'
-import Products from '../components/Dashboard/Products'
-import Settings from '../components/Dashboard/Settings'
+import Products from '../components/Dashboard/Products';
+import Invoices from '../components/Dashboard/Invoices';
 import { Fragment, useEffect, useLayoutEffect, useState } from 'react'
 import { Dialog, Menu, Transition } from '@headlessui/react'
 import {
@@ -24,6 +24,9 @@ import { User } from './api/userType'
 import PageHeader from '../components/Dashboard/PageHeader'
 import { useRouter } from 'next/router'
 import * as blockies from 'ethereum-blockies-png'
+import useProducts from '../hooks/useProducts'
+import { useTransaction } from 'wagmi'
+import useTransactions from '../hooks/useTransactions'
 
 const navigation = [
   { name: 'Overview', comp_name: 'overview', icon: HomeIcon, current: true },
@@ -34,13 +37,13 @@ const navigation = [
     icon: ShoppingCartIcon,
     current: false,
   },
+  { name: 'Invoices', comp_name: 'invoices', icon: CogIcon, current: false },
   {
     name: 'Transactions',
     comp_name: 'transactions',
     icon: CreditCardIcon,
     current: false,
   },
-  { name: 'Settings', comp_name: 'settings', icon: CogIcon, current: false },
 ]
 
 const secondaryNavigation = [
@@ -61,55 +64,15 @@ const cards = [
   // More items...
 ]
 
-const transactions = [
-  {
-    id: 1,
-    productName: '2 Kg Ganja',
-    pageName: 'Page Name',
-    href: '#',
-    amount: '$20,000',
-    currency: 'USD',
-    status: 'success',
-    date: 'July 11, 2020',
-    datetime: '2020-07-11',
-  },
-  {
-    id: 2,
-    productName: '2 Kg Ganja',
-    pageName: 'Page Name',
-    href: '#',
-    amount: '$20,000',
-    currency: 'USD',
-    status: 'success',
-    date: 'July 11, 2020',
-    datetime: '2020-07-11',
-  },
-  {
-    id: 3,
-    productName: '2 Kg Ganja',
-    pageName: 'Page Name',
-    href: '#',
-    amount: '$20,000',
-    currency: 'USD',
-    status: 'success',
-    date: 'July 11, 2020',
-    datetime: '2020-07-11',
-  },
-  // More transactions...
-]
-
-const statusStyles = {
-  success: 'bg-green-100 text-green-800',
-  processing: 'bg-yellow-100 text-yellow-800',
-  failed: 'bg-gray-100 text-gray-800',
-}
-
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(' ')
 }
 
 export default function Dashboard() {
   const { push } = useRouter()
+
+  const [products, getProducts, createProducts, total_sold, totalSold] = useProducts()
+  const [transactions, getTransactions, createTransaction, totalEarned] = useTransactions()
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [currentTab, setCurrentTab] = useState('overview')
@@ -134,53 +97,40 @@ export default function Dashboard() {
         push('/auth')
         return
       }
-      console.log('user2')
+      console.log('user2', supabase.auth.session()?.access_token)
+      setRunning(true)
     } catch (e) {
       push('/auth')
       console.log('not logged in')
       return
     }
-    setRunning(true)
   }, [])
 
   useEffect(() => console.log(running, 'running'), [running])
+  useEffect(() => total_sold(), [])
 
   const getMoneyEarned = async () => {
     if (running) {
-      console.log(supabase.auth.session()?.access_token as string, "SESSION")
-      const data = await fetch('/api/products/money_earned', {
-        headers: {
-          'bearer-token': supabase.auth.session()?.access_token as string,
-        },
-      })
-      const res = await data.json()
-      cards[2].amount = '$' + res
-      setMoney('$' + res)
+      cards[2].amount = '$' + totalEarned
     }
   }
 
   const totalProductSold = async () => {
     if (running) {
-      const data = await fetch('/api/products/product_sold', {
-        headers: {
-          'bearer-token': supabase.auth.session()?.access_token as string,
-        },
-      })
-      const res = await data.json()
-      cards[1].amount = res
-      setSold(res)
+      console.log(totalSold)
+      cards[1].amount = totalSold
     }
   }
 
   const totalVisits = async () => {
     if (running) {
-      const data = await fetch('/api/pages/visits', {
+      const data = await fetch(`http://wagpay.herokuapp.com/api/pages/total_visits`, {
         headers: {
           'bearer-token': supabase.auth.session()?.access_token as string,
         },
       })
       const res = await data.json()
-      cards[0].amount = res
+      cards[0].amount = res._sum.visits
       console.log(cards[0])
       setVisits(res)
     }
@@ -206,7 +156,7 @@ export default function Dashboard() {
       totalVisits()
       totalPages()
     }
-  }, [running])
+  }, [running, totalSold, totalEarned])
 
   const changeTab = (nextTab: string, nextId: number) => {
     const index = navigation
@@ -484,14 +434,12 @@ export default function Dashboard() {
           </div>
           <main className="flex-1 pb-8">
             {/* Page header */}
-            <PageHeader user={user} />
+            <PageHeader user={user} currentTab={currentTab} />
             {currentTab === 'overview' && <Overview cards={cards} username={user.username} />}
             {currentTab === 'pages' && <Pages cards={cards} username={user.username} />}
+            {currentTab === 'invoices' && <Invoices cards={cards} />}
             {currentTab === 'transactions' && <Transactions cards={cards} />}
             {currentTab === 'products' && <Products cards={cards} />}
-            {/* {currentTab === 'settings' && (
-              <Settings cards={cards} transactions={transactions} />
-            )} */}
           </main>
         </div>
       </div>

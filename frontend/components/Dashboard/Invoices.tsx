@@ -25,6 +25,10 @@ import Link from 'next/link'
 import TransactionModal from './TransactionModal'
 import useTransactions from '../../hooks/useTransactions'
 import { Transaction } from '../../types/Transaction'
+import useInvoices from '../../hooks/useInvoices'
+import { Invoice } from 'Invoice'
+import { Ethereum } from './Pages'
+import { Solana } from './Overview'
 
 const statusStyles = {
   success: 'bg-green-100 text-green-800',
@@ -41,21 +45,7 @@ interface Props {
 }
 
 const Transactions = ({ cards }: Props) => {
-  const [transactions, getTransactions] = useTransactions()
-  const [selectedTransaction, setSelectedTransaction] = useState<any>({})
-
-  let [isOpen, setIsOpen] = useState(false)
-
-  function closeModal() {
-    setIsOpen(false)
-  }
-
-  function openModal(transaction: any) {
-    setSelectedTransaction(transaction)
-    setIsOpen(true)
-  }
-
-  useEffect(() => getTransactions(), [])
+  const [invoices, getInvoices] = useInvoices()
 
   return (
     <div className="mt-8">
@@ -117,11 +107,11 @@ const Transactions = ({ cards }: Props) => {
           role="list"
           className="mt-2 divide-y divide-gray-200 overflow-hidden shadow sm:hidden"
         >
-          {transactions &&
-            transactions.data.map((transaction: Transaction) => (
-              <li key={transaction.id}>
+          {invoices &&
+            invoices.data.map((invoice: Invoice) => (
+              <li key={invoice.id}>
                 <a
-                  // href={transaction.href}
+                  // href={invoice.href}
                   className="block bg-white px-4 py-4 hover:bg-gray-50"
                 >
                   <span className="flex items-center space-x-4">
@@ -131,10 +121,10 @@ const Transactions = ({ cards }: Props) => {
                         aria-hidden="true"
                       />
                       <span className="flex flex-col truncate text-sm text-gray-500">
-                        <span className="truncate">{transaction.email}</span>
+                        <span className="truncate">{invoice.email}</span>
                         <span>
                           <span className="font-medium text-gray-900">
-                            {transaction.total_prices}
+                            {invoice.value}
                           </span>{' '}
                         </span>
                       </span>
@@ -190,95 +180,61 @@ const Transactions = ({ cards }: Props) => {
                     <th className="bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                       Amount
                     </th>
-                    <th className="hidden bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 md:block">
-                      Status
+                    <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Supported Currencies
+                    </th>
+                    <th className="bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Transaction
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {(!transactions || transactions.length <= 0) && (
+                  {(!invoices || invoices.length <= 0) && (
                     <div>No Transactions Available</div>
                   )}
-                  {transactions &&
-                    transactions.data.length > 0 &&
-                    transactions.data.map((transaction: Transaction) => (
-                      <tr key={transaction.id} className="bg-white">
-                        <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
-                          {transaction.id}
+                  {invoices &&
+                    invoices.data.length > 0 &&
+                    invoices.data.map((invoice: Invoice) => (
+                      <tr key={invoice.id} className="bg-white">
+                        <td className="w-20 truncate whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
+                          {invoice.id}
                         </td>
                         <td className="w-full max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                           <div className="flex">
                             <a
-                              onClick={() => openModal(transaction)}
                               className="group inline-flex space-x-2 truncate text-sm"
                             >
                               <p className="truncate text-gray-500 group-hover:text-gray-900">
-                                {transaction.name} ({transaction.email})
+                                {invoice.name} ({invoice.email})
                               </p>
                             </a>
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
-                          {transaction.page && (
-                            <Link href={`/${transaction.page.slug}`}>
-                              {transaction.page.title}
+                          {invoice.page && (
+                            <Link href={`/${invoice.page.slug}`}>
+                              {invoice.page.title}
                             </Link>
                           )}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
                           <span className="font-medium text-gray-900">
-                            ${transaction.total_prices}{' '}
+                            ${invoice.value}{' '}
                           </span>
                           USD
                         </td>
-                        <td className="hidden whitespace-nowrap px-6 py-4 text-sm text-gray-500 md:block">
-                          <span
-                            className={classNames(
-                              // @ts-ignore
-                              // statusStyles[transaction.status],
-                              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize'
-                            )}
-                          >
-                            {transaction.currency === 'ethereum' && (
-                              <>
-                                {!transaction.transaction_hash ? (
-                                  <span>❌</span>
-                                ) : (
-                                  <span>✅</span>
-                                )}
-                                <a
-                                  href={`https://etherscan.io/tx/${transaction.transaction_hash}`}
-                                  className="flex space-x-3"
-                                >
-                                  <span>See Transaction on</span>{' '}
-                                  <img
-                                    src="https://etherscan.io/images/brandassets/etherscan-logo.png"
-                                    className="w-14"
-                                    alt=""
-                                  />
-                                </a>
-                              </>
-                            )}
-                            {transaction.currency === 'solana' && (
-                              <>
-                                {!transaction.transaction_hash ? (
-                                  <span>❌</span>
-                                ) : (
-                                  <span>✅</span>
-                                )}
-                                <a
-                                  href={`https://solscan.io/tx/${transaction.transaction_hash}`}
-                                  className="flex space-x-3"
-                                >
-                                  <span>See Transaction on</span>{' '}
-                                  <img
-                                    src="https://solscan.io/static/media/solana-solana-scan-blue.5ffb9996.svg"
-                                    className="w-14"
-                                    alt=""
-                                  />
-                                </a>
-                              </>
-                            )}
+                        <td className="flex space-x-3 whitespace-nowrap px-8 pt-3 text-sm text-gray-500">
+                          {invoice.supported_currencies.map((currency: any) => (
+                            <span className="font-medium text-gray-900">
+                              {console.log(currency)}
+                              {currency === 'ethereum' && <Ethereum />}
+                              {currency === 'solana' && <Solana />}
+                            </span>
+                          ))}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                          <span className="font-medium text-gray-900">
+                            {invoice.submissionId}
                           </span>
                         </td>
                       </tr>
@@ -298,7 +254,7 @@ const Transactions = ({ cards }: Props) => {
                   </p>
                 </div>
                   <div className="flex flex-1 justify-between sm:justify-end">
-                    {transactions.cursor > 10 && 
+                    {invoices.cursor > 10 && 
                       <button
                         className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                       >
@@ -306,7 +262,7 @@ const Transactions = ({ cards }: Props) => {
                       </button>
                     }
                     <button
-                      onClick={() => getTransactions(transactions.cursor)}
+                      onClick={() => getInvoices(invoices.cursor)}
                       className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
                     Next
@@ -317,12 +273,6 @@ const Transactions = ({ cards }: Props) => {
           </div>
         </div>
       </div>
-      <TransactionModal
-        isOpen={isOpen}
-        closeModal={closeModal}
-        openModal={openModal}
-        transaction={selectedTransaction}
-      />
     </div>
   )
 }

@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react'
 import { Product as ProductInterface } from '../../pages/api/product'
 import { supabase } from '../../supabase'
 import Link from 'next/link'
+import useProducts from '../../hooks/useProducts'
 
 const statusStyles = {
   success: 'bg-green-100 text-green-800',
@@ -44,22 +45,8 @@ interface Data {
 }
 
 const Products = ({ cards }: Props) => {
-  const [products, setProducts] = useState<any[]>([])
-
-  const fetchProducts = async () => {
-    const data = await fetch('/api/products/userproducts', {
-      headers: {
-        'bearer-token': supabase.auth.session()?.access_token as string,
-      },
-    })
-    const res = await data.json()
-    console.log(res)
-    setProducts(res)
-  }
-
-  useEffect(() => {
-    fetchProducts()
-  }, [])
+  const [products, getProducts, createProducts] = useProducts()
+	useEffect(() => getProducts() as any, [])
 
   return (
     <div className="mt-8">
@@ -121,7 +108,7 @@ const Products = ({ cards }: Props) => {
           role="list"
           className="mt-2 divide-y divide-gray-200 overflow-hidden shadow sm:hidden"
         >
-          {products.map((product) => (
+          {products.map((product: ProductInterface) => (
             <li key={product.id}>
               <a className="block bg-white px-4 py-4 hover:bg-gray-50">
                 <span className="flex items-center space-x-4">
@@ -202,7 +189,7 @@ const Products = ({ cards }: Props) => {
                   )}
                   {products &&
                     products.length > 0 &&
-                    products.map((product) => (
+                    products.map((product: ProductInterface) => (
                       <tr key={product.id} className="bg-white">
                         <td className="w-full max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                           <div className="flex">

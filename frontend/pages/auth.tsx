@@ -9,9 +9,10 @@ const Auth: React.FC = () => {
 	const { push } = useRouter()
 
 	const getOrCreateUser = async (email: string) => {
-		let { data, error } = await supabase.from('User').select('*').eq('email', email)
-
-		if(error || data?.length === 0) {
+		const data = await fetch(`http://wagpay.herokuapp.com/api/user/email/${email}`)
+		const user = await data.json()
+		console.log(user, "USER")
+		if(data.status == 400) {
 			toast('Claim a username first')	
 			push('/claim')
 			return false
@@ -21,7 +22,6 @@ const Auth: React.FC = () => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
-		console.log(email)
 		let alreadyUser = await getOrCreateUser(email)
 		if(alreadyUser) {
 			const promise = supabase.auth.signIn({ email })

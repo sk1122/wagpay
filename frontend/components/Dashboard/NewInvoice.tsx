@@ -6,6 +6,9 @@ import toast from 'react-hot-toast'
 import StoreSuccess from './StoreSuccess'
 import { uploadFile } from '../../pages/api/pages/create'
 import usePages from '../../hooks/usePage'
+import useProducts from '../../hooks/useProducts'
+import { Product as ProductInterface } from "../../pages/api/product"
+import useInvoices from '../../hooks/useInvoices'
 
 type supported_currencies = 'Ethereum' | 'Solana'
 
@@ -32,39 +35,36 @@ interface Field {
 type _fields = 'name' | 'type'
 type _products = 'discounted_price' | 'price' | 'name' | 'description' | 'links' | 'image'
 
-const supported_currencies = [{name: 'Ethereum', symbol: 'ETH'}, {name: 'Solana', symbol: "SOL"}, {name: 'USDC (Solana)', symbol: 'usdcsol'}, {name: 'USDC (Ethereum)', symbol: 'usdceth'}]
+const supported_currencies = [{name: 'Ethereum', symbol: 'ethereum'}, {name: 'Solana', symbol: "solana"}, {name: 'USDC (Solana)', symbol: 'usdcsol'}, {name: 'USDC (Ethereum)', symbol: 'usdceth'}]
 
 const supported_types = ['text', 'number']
 
-const NewStore = (props: Props) => {
-  const [pages, getPages, createPage] = usePages()
+const NewInvoice = (props: Props) => {
+  const [invoice, getInvoice, createInvoice] = useInvoices()
+  const [_products, getProducts] = useProducts()
+
+  useEffect(() => getProducts(), [])
   
   const [products, setProducts] = useState<Product[]>([])
-  const [fields, setFields] = useState<Field[]>([])
 
   const [storeSuccess, setStoreSuccess] = useState(false)
   const [tweet, setTweet] = useState('')
 
-  const [title, setTitle] = useState('')
-  const [logo, setLogo] = useState<File>()
+  const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [socialLinks, setSocialLinks] = useState<object>({})
-  const [currencies, setCurrencies] = useState<string[]>([])
-  const [slug, setSlug] = useState<string>('')
+  const [value, setvalue] = useState(0)
+  const [discount, setDiscount] = useState(0.00)
+  const [tax, setTax] = useState(0.00)
+  const [address, setAddress] = useState('')
   const [eth, setETH] = useState<string>('')
   const [sol, setSOL] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [dueDate, setDueDate] = useState<Date>(new Date())
+  const [currencies, setCurrencies] = useState<string[]>([])
   const [showCurrencies, setShowCurrencies] = useState<string[]>([])
-
-  const changeField = async (field: _fields, value: any | null, idx: number) => {
-    console.log(field, value, idx, fields.length)
-    await setFields((previousState) => {
-      let field_values = [...fields]
-      console.log(field_values, fields.length)
-      field_values[idx][field] = value
-      console.log(field_values, fields.length)
-      return field_values
-    })
-  }
+  const [selectProducts, setSelectProducts] = useState<string[]>([])
+  const [selectedPage, setSelectedPage] = useState<string[]>([])
+  const [showProducts, setShowProducts] = useState<string[]>([])
 
   const changeProduct = async (field: _products, value: any, idx: number) => {
     console.log(field, value, idx)
@@ -116,25 +116,22 @@ const NewStore = (props: Props) => {
       toast.error('Add Products')
       return
     }
-    if (typeof fields === 'undefined' || fields.length <= 0) {
-      toast.error('Add Fields')
-      return
-    }
 
     const toastId = toast.loading('Creating Store')
     try {
-      await createPage({
-        title: title,
-        logo: logo,
-        description: description,
-        social_links: socialLinks,
-        accepted_currencies: currencies,
-        slug: slug,
-        eth_address: eth,
-        sol_address: sol,
-        visits: 0,
-        products: {create: products},
-        fields: fields,
+      await createInvoice({
+        value: value,
+        discount: discount,
+        Tax: tax,
+        name: name,
+        address: address,
+        supported_currencies: currencies,
+        page: selectedPage,
+        products: {connect: selectProducts},
+        extra_products: products,
+        due_date: dueDate,
+        notes: description,
+        email: email,
       })
     } catch (e) {
       props.setIsOpen(false)
@@ -148,16 +145,7 @@ const NewStore = (props: Props) => {
     toast.dismiss(toastId)
     toast.success('Successfully Created Store')
     props.setIsOpen(false)
-    setTweet(`https://wagpay.xyz/${props.username}/${slug}`)
     setStoreSuccess(true)
-  }
-
-  const removeField = (idx: number) => {
-    setFields((ps) => {
-      let newFields = [...fields]
-      newFields.splice(idx, 1)
-      return newFields
-    })
   }
 
   const removeProduct = (idx: number) => {
@@ -168,7 +156,7 @@ const NewStore = (props: Props) => {
     })
   }
 
-  useEffect(() => console.log(products), [products])
+  useEffect(() => console.log(dueDate), [dueDate])
 
   return (
     <div
@@ -177,32 +165,20 @@ const NewStore = (props: Props) => {
         'absolute top-0 right-0 z-50 h-screen w-11/12 lg:w-1/3 space-y-5 overflow-y-scroll bg-indigo-500 px-16 pt-10 text-white'
       }
     >
-      <h1 className="text-3xl font-black">Create a New Store</h1>
+      <h1 className="text-3xl font-black">Create a New Invoice</h1>
       <div className="flex flex-col space-y-2">
-        <label htmlFor="Store">Store Name</label>
+        <label htmlFor="Store">Name</label>
         <input
           type="text"
           name="Store"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
         />
       </div>
       <div className="flex flex-col space-y-2">
-        <label htmlFor="Store">Store Logo</label>
-        <div className="block h-full w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-          <input
-            type="file"
-            name="store_logo"
-            onChange={(e) => handleImage(e.target.files, setLogo)}
-            className="m-0 h-full w-full cursor-pointer rounded-full p-0 outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col space-y-2">
         <label htmlFor="Store">
-          Store Description (What you sell? Who you are?)
+          Note
         </label>
         <textarea
           name="Store"
@@ -212,12 +188,68 @@ const NewStore = (props: Props) => {
         ></textarea>
       </div>
       <div className="flex flex-col space-y-2">
-        <label htmlFor="Store">Store Slug (/store-name)</label>
+        <label htmlFor="Store">Invoice Value</label>
+        <input
+          type="number"
+          name="Store"
+          value={value}
+          onChange={(e) => setvalue(Number(e.target.value))}
+          className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="Store">Discount (discount should be less than value)</label>
+        <input
+          type="number"
+          name="Store"
+          value={discount}
+          onChange={(e) => setDiscount(Number(e.target.value))}
+          className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="Store">Tax Rate %</label>
+        <input
+          type="number"
+          name="Store"
+          value={tax}
+          onChange={(e) => setTax(Number(e.target.value))}
+          className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="Store">
+          Address
+        </label>
         <input
           type="text"
           name="Store"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value.toLowerCase())}
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="Store">
+          email
+        </label>
+        <input
+          type="text"
+          name="Store"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="Store">
+          due date
+        </label>
+        <input
+          type="date"
+          name="Store"
+          value={dueDate.toISOString().split('T')[0]}
+          onChange={(e) => setDueDate(new Date(e.target.value))}
           className="rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
         />
       </div>
@@ -276,55 +308,36 @@ const NewStore = (props: Props) => {
         </select>
       </div>
       <div className="flex flex-col space-y-2">
-        <label htmlFor="Store">Form Fields</label>
-        {fields.map((field, idx) => {
-          return (
-            <div key={idx} className="flex flex-col space-y-2">
-              <div className='w-full flex justify-between items-center'>
-                <h3>Field {field.name}</h3>
-                <span className='text-3xl cursor-pointer' onClick={() => removeField(idx)}>-</span>
-              </div>
-              <div className="flex space-x-2">
-                <input
-                  value={field.name}
-                  onChange={(e) => changeField('name', e.target.value, idx)}
-                  type="text"
-                  name="Store"
-                  placeholder="Field Name"
-                  className="w-1/2 rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-                />
-                <div className="bg-white w-1/2 rounded-xl border-none text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
-                  <select
-                    className="relative block w-full rounded-md border-gray-300 bg-transparent focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    aria-label="Default select example"
-                    value={field.type}
-                    onChange={(e) =>
-                      changeField('type', e.target.value, idx)
-                    }
-                  >
-                    {supported_types.map(value => {
-                      return <option value={value}>{value}</option>
-                    })}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-        <button
-          onClick={() => {
-            setFields(() => [...fields, { name: '', type: '', value: '' }])
-          }}
-          type="button"
-          className="flex items-center justify-center space-x-2 rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          <span>New Field</span>
-          <span className="h-5 w-5">
-            <PlusIcon />
-          </span>
-        </button>
-      </div>
       <div className="flex flex-col space-y-2">
+        <label htmlFor="Store">Select Products</label>
+        <p className='space-x-2'>
+          {showProducts.map((v) => (
+            <span>{v}</span>
+          ))}
+        </p>
+        <select
+          className="form-select block
+						w-1/3
+						appearance-none
+						rounded-xl
+						border
+						border-solid
+						border-gray-300
+						bg-white
+						bg-clip-padding bg-no-repeat px-3
+						py-1.5 text-base font-normal
+						text-gray-700
+						transition
+						ease-in-out
+						focus:border-indigo-600 focus:bg-white focus:text-gray-700 focus:outline-none"
+          aria-label="Default select example"
+          onChange={(e) => {if(selectProducts.includes(e.target.value)) {return}; setSelectProducts(() => [...selectProducts, e.target.value]); setShowProducts(() => [...showProducts, _products[e.target.selectedIndex].name])}}
+        >
+          {_products && _products.map((value: ProductInterface) => {
+            return <option value={value.id}>{value.name}</option>
+          })}
+        </select>
+      </div>
         <label htmlFor="Store">Products</label>
         {products.map((product, idx) => {
           return (
@@ -408,4 +421,4 @@ const NewStore = (props: Props) => {
   )
 }
 
-export default NewStore
+export default NewInvoice

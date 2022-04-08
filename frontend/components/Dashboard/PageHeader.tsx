@@ -24,19 +24,24 @@ import {
 import { useState, useEffect } from 'react'
 import * as blockies from 'ethereum-blockies-png'
 import NewStore from './NewStore'
+import NewInvoice from './NewInvoice'
 
 interface Props {
   user: any
+  currentTab: string
 }
 
-const PageHeader = ({ user }: Props) => {
+const PageHeader = ({ user, currentTab }: Props) => {
   const [img, setImg] = useState('')
   const [isOpen, setIsOpen] = useState(false)
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false)
 
   useEffect(() => {
     const dataURL = blockies.createDataURL({ seed: user.username })
     setImg(dataURL)
   }, [user])
+
+  useEffect(() => console.log(isInvoiceOpen), [isInvoiceOpen])
 
   return (
     <div className="bg-white shadow">
@@ -88,29 +93,49 @@ const PageHeader = ({ user }: Props) => {
             >
               Edit Profile
             </button>
-            <button
-              onClick={() => setIsOpen(true)}
-              type="button"
-              className="flex items-center space-x-2 rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              <span>New Store</span>
-              <span className="h-5 w-5">
-                <PlusIcon />
-              </span>
-            </button>
+            {currentTab === 'invoices' ?
+              <button
+                onClick={() => setIsInvoiceOpen(true)}
+                type="button"
+                className="flex items-center space-x-2 rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span>New Invoices</span>
+                <span className="h-5 w-5">
+                  <PlusIcon />
+                </span>
+              </button>
+            :
+              <button
+                onClick={() => setIsOpen(true)}
+                type="button"
+                className="flex items-center space-x-2 rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span>New Store</span>
+                <span className="h-5 w-5">
+                  <PlusIcon />
+                </span>
+              </button>
+            }
+            
           </div>
         </div>
       </div>
 
       <div
         className={
-          (isOpen ? '' : 'hidden ') +
+          (isInvoiceOpen || isOpen ? '' : 'hidden ') +
           'absolute top-1/2 left-1/2 z-50 h-full w-full -translate-x-1/2 -translate-y-1/2 transform backdrop-blur-sm'
         }
       >
         <XCircleIcon
-          onClick={() => setIsOpen(false)}
+          onClick={() => {setIsInvoiceOpen(false); setIsOpen(false)}}
           className="absolute top-10 right-1/3 h-10 w-10 -translate-x-1/2 -translate-y-1/2 transform cursor-pointer"
+        />
+        
+        <NewInvoice
+          isOpen={isInvoiceOpen}
+          setIsOpen={setIsInvoiceOpen}
+          username={user.username}
         />
         <NewStore
           isOpen={isOpen}

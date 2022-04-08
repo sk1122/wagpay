@@ -12,7 +12,7 @@ interface Props {
 export default function TransactionModal(props: Props) {
   return (
     <>
-	<Transition appear show={props.isOpen} as={Fragment}>
+	    <Transition appear show={props.isOpen} as={Fragment}>
         <Dialog
           as="div"
           className="fixed inset-0 z-10 overflow-y-auto"
@@ -73,7 +73,8 @@ export default function TransactionModal(props: Props) {
 							</a>
 						</div>
 					}
-					<p className='flex space-x-2 font-bold'><span className='font-normal'>Store:</span><Link href={`/${props.transaction.page_id?.slug}`}>{props.transaction.page_id?.title}</Link></p>
+          {console.log(props.transaction)}
+					{/* <p className='flex space-x-2 font-bold'><span className='font-normal'>Store:</span><Link href={`/${props.transaction.page.slug}`}>{props.transaction.page.title}</Link></p> */}
 					<p className=''>Amount: <span className='font-bold'>$ {props.transaction.total_prices}</span></p>
 					<h1 className='text-xl font-bold'>Field Values</h1>
 					{props.transaction.fields && props.transaction.fields.map((value: any) => {

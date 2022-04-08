@@ -1,11 +1,11 @@
 import Head from 'next/head'
-import Product from '../../components/Product'
-import PaymentCard from '../../components/PaymentCard'
+import Product from '../../../components/Product'
+import PaymentCard from '../../../components/PaymentCard'
 import { ChangeEvent, useLayoutEffect, useRef, useState } from 'react'
 import { useEffect } from 'react'
-import { supabase } from '../../supabase'
+import { supabase } from '../../../supabase'
 import { useRouter } from 'next/router'
-import { Product as ProductInterface } from '../api/product'
+import { Product as ProductInterface } from '../../api/product'
 import QRCodeStyling, {
   DrawType,
   TypeNumber,
@@ -21,7 +21,8 @@ import {
   PlusIcon,
   MinusIcon
 } from '@heroicons/react/solid'
-import useTransactions from '../../hooks/useTransactions'
+import useTransactions from '../../../hooks/useTransactions'
+import { Invoice } from 'Invoice'
 
 interface Page {
   id: number
@@ -35,25 +36,24 @@ interface Page {
   eth_address?: string
   sol_address?: string
   user: number
-  visits: number
   products: ProductInterface[]
   fields: any[]
-  webhook_urls: string[]
 }
 
 interface Props {
-  store: Page
+  invoice: Invoice
 }
 
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
-      `http://wagpay.herokuapp.com/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
+      `http://wagpay.herokuapp.com/api/invoices/${context.params.invoice}`
     )
-    const store: Page = await res.json()
+    const invoice: Invoice = await res.json()
+    console.log(invoice)
     return {
       props: {
-        store: store,
+        invoice: invoice,
       },
     }
   } catch (e) {
@@ -61,24 +61,16 @@ export const getServerSideProps = async (context: any) => {
   }
 }
 
-const Store = ({ store }: Props) => {
-  console.log(store)
+const Store = ({ invoice }: Props) => {
+  console.log(invoice)
   const { query } = useRouter()
 
   const updateVisit = async () => {
-    console.log(store.id)
+    console.log(invoice.id)
     let data = await fetch(
-      `http://wagpay.herokuapp.com/api/pages`,
+      `https://wagpay.xyz/api/pages/updateVisits?id=${invoice.id}`,
       {
         method: 'PATCH',
-        body: JSON.stringify({
-          id: store.id,
-          visits: store.visits + 1
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'bearer-token': supabase.auth.session()?.access_token as string
-        }
       }
     )
   }
@@ -87,6 +79,23 @@ const Store = ({ store }: Props) => {
 
   useEffect(() => {
     updateVisit()
+  }, [])
+
+  useEffect(() => {
+    if (query.products) {
+      const products = query.products as string[]
+      (async () => {
+        let ids: ProductInterface[] = []
+        const promise = await products.map(async (v) => {
+          let data = await fetch(`https://wagpay.xyz/api/products/${v}`)
+          let product = (await data.json()) as ProductInterface
+          console.log(product)
+          ids.push(product)
+        })
+        await Promise.all(promise)
+        addNewProduct(ids)
+      })()
+    }
   }, [])
 
   useEffect(() => {
@@ -254,7 +263,7 @@ const Store = ({ store }: Props) => {
   return (
     <div className="w-full min-h-screen bg-gray-900 font-inter">
       <Head>
-        <title>{store.title} - WagPay</title>
+        <title>{invoice.name} - WagPay</title>
       </Head>
       <div className={(isModalOpen ? "" : "hidden") + "w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
         <div className={(isModalOpen ? "" : "hidden") + " absolute bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
@@ -265,9 +274,9 @@ const Store = ({ store }: Props) => {
       <main className="mx-auto max-w-2xl px-4 pt-16 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="flex justify-center items-start flex-col space-y-3">
           <h1 className="text-white font-jakarta text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {store.title}
+            {invoice.name}
           </h1>
-          <p className='text-white'>{store.description}</p>
+          <p className='text-white'>{invoice.notes}</p>
         </div>
 
         <div className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16">
@@ -276,7 +285,12 @@ const Store = ({ store }: Props) => {
               role="list"
               className="divide-y divide-gray-200 border-t border-b border-gray-200"
             >
-              {store && store.products.map((product, productIdx) => (
+              {invoice && invoice.products.map((product, productIdx) => (
+                <>
+                <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
+                </>
+              ))}
+              {invoice && invoice.extra_products.map((product, productIdx) => (
                 <>
                 <Product selectProducts={selectProducts} product={product} add={addNewProduct} remove={removeProduct} productIds={query.products as any[]} />
                 </>
@@ -289,20 +303,6 @@ const Store = ({ store }: Props) => {
             aria-labelledby="payment-card"
             className="lg:fixed lg:right-20 2xl:right-80 lg:w-1/3 xl:w-1/3 2xl:w-1/4 mt-16 rounded-lg  lg:col-span-5 lg:mt-0"
           >
-            <PaymentCard
-              accepted_currencies={store.accepted_currencies}
-              setURL={setUrl}
-              updateTransaction={updateTransaction}
-              createTransaction={createTransaction}
-              storeId={store.id}
-              fields={store.fields}
-              totalPrice={totalPrice}
-              merchantETH={store.eth_address as string}
-              merchantSOL={store.sol_address as string}
-              setIsModalOpen={setIsModalOpen}
-              setQrCode={setQrCode}
-              selectedProducts={selectedProducts}
-            />
           </section>
         </div>
       </main>
