@@ -47,7 +47,7 @@ interface Props {
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
-      `http://localhost:2000/api/invoices/${context.params.invoice}`
+      `http://wagpay.herokuapp.com/api/invoices/${context.params.invoice}`
     )
     const invoice: Invoice = await res.json()
     console.log(invoice)

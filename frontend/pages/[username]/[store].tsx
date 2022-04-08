@@ -35,6 +35,7 @@ interface Page {
   eth_address?: string
   sol_address?: string
   user: number
+  visits: number
   products: ProductInterface[]
   fields: any[]
 }
@@ -46,7 +47,7 @@ interface Props {
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
-      `http://localhost:2000/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
+      `http://wagpay.herokuapp.com/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
     )
     const store: Page = await res.json()
     return {
@@ -66,9 +67,17 @@ const Store = ({ store }: Props) => {
   const updateVisit = async () => {
     console.log(store.id)
     let data = await fetch(
-      `https://wagpay.xyz/api/pages/updateVisits?id=${store.id}`,
+      `http://wagpay.herokuapp.com/api/pages`,
       {
         method: 'PATCH',
+        body: JSON.stringify({
+          id: store.id,
+          visits: store.visits + 1
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'bearer-token': supabase.auth.session()?.access_token as string
+        }
       }
     )
   }
@@ -77,23 +86,6 @@ const Store = ({ store }: Props) => {
 
   useEffect(() => {
     updateVisit()
-  }, [])
-
-  useEffect(() => {
-    if (query.products) {
-      const products = query.products as string[]
-      (async () => {
-        let ids: ProductInterface[] = []
-        const promise = await products.map(async (v) => {
-          let data = await fetch(`https://wagpay.xyz/api/products/${v}`)
-          let product = (await data.json()) as ProductInterface
-          console.log(product)
-          ids.push(product)
-        })
-        await Promise.all(promise)
-        addNewProduct(ids)
-      })()
-    }
   }, [])
 
   useEffect(() => {

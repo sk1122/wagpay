@@ -124,13 +124,13 @@ export default function Dashboard() {
 
   const totalVisits = async () => {
     if (running) {
-      const data = await fetch('/api/pages/visits', {
+      const data = await fetch(`http://wagpay.herokuapp.com/api/pages/total_visits`, {
         headers: {
           'bearer-token': supabase.auth.session()?.access_token as string,
         },
       })
       const res = await data.json()
-      cards[0].amount = res
+      cards[0].amount = res._sum.visits
       console.log(cards[0])
       setVisits(res)
     }

@@ -9,7 +9,7 @@ const useProducts = () => {
 
 	async function getProducts(cursor?: number) {
 		if(!cursor) {
-			const data = await fetch('http://localhost:2000/api/products/all/', {
+			const data = await fetch('http://wagpay.herokuapp.com/api/products/all/', {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -18,7 +18,7 @@ const useProducts = () => {
 			console.log(res, "RES")
 			setProducts(res)
 		} else {
-			const data = await fetch(`http://localhost:2000/api/products/all?cursor=${cursor.toString()}`, {
+			const data = await fetch(`http://wagpay.herokuapp.com/api/products/all?cursor=${cursor.toString()}`, {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -29,7 +29,7 @@ const useProducts = () => {
 	}
 
 	async function total_sold() {
-		var data = await fetch('http://localhost:2000/api/products/total_sold', {
+		var data = await fetch('http://wagpay.herokuapp.com/api/products/total_sold', {
 			headers: {
 				'bearer-token': supabase.auth.session()?.access_token as string,
 				'Content-Type': 'application/json'
@@ -44,7 +44,7 @@ const useProducts = () => {
 	}
 
 	async function createProducts(page: Page) {
-		var data = await fetch('http://localhost:2000/api/products/', {
+		var data = await fetch('http://wagpay.herokuapp.com/api/products/', {
 			method: 'POST',
 			body: JSON.stringify(page),
 			headers: {
