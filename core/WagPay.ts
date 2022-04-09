@@ -1,15 +1,14 @@
-import { supabase } from "./supabase"
-import { RealtimeClient } from '@supabase/realtime-js'
-
-type supported_currencies = 'ETH' | 'SOL' | 'USDC (Ethereum)' | 'USDC (Solana)'
+import fetch from 'cross-fetch'
+type supported_currencies = 'ethereum' | 'solana' | 'usdceth' | 'usdcsol'
 
 interface PaymentInterface {
 	value: number
-	from_email?: string
+	transaction_hash?: string
+	is_paid?: boolean
+	pagesId?: number
+	from_email: string
 	currency: supported_currencies[]
-	receiving_store: string
-	payment_id?: string
-	store_id?: number
+	receiving_store?: string
 }
 
 class APIKeyInvalid {}
@@ -18,81 +17,104 @@ class CantCreatePaymentIntent {}
 
 class WagPay {
 	private api_key
-	private user
+	private user: any
 	private can_run = false
 
 	constructor(api_key: string) {
-		if(!this.isValidAPIKey(api_key)) {
+		this.api_key = api_key
+	}
+
+	async check_first(api_key: string) {
+		// console.log(await this.isValidAPIKey(api_key))
+		if(!(await this.isValidAPIKey(api_key))) {
 			throw new APIKeyInvalid()
 		}
 		this.can_run = true
 	}
 
 	async isValidAPIKey(api_key: string) {
-		const { data, error } = await supabase.from('User').select('*').eq('api_key', api_key).maybeSingle()
-
-		if(!data || error) {
-			return false
-		}
-
-		this.user = data
+		const data = await fetch(`http://wagpay.herokuapp.com/api/user/apiKey/${api_key}`)
+		const res = await data.json()
+		// console.log(res, data.status, "Dsa")
+		if(data.status === 400) return false
 		
+		this.user = res
+
 		return true
 	}
 
 	async canRun() {
-		if(!this.can_run) {
+		if(!(await this.isValidAPIKey(this.api_key))) {
 			throw new APIKeyInvalid()
 		}
 	}
 
 	async getStore(store_slug: string) {
-		this.canRun()
+		await this.canRun()
 
-		const { data, error } = await supabase.from('pages').select('*').eq('slug', store_slug)
+		const data = await fetch(`http://wagpay.herokuapp.com/api/pages/get?slug=${store_slug}&username=${this.user.username}`)
+		const store = await data.json()
 
-		if(!data || error) {
-			throw new StoreNotFound()
-		}
+		if(!store) throw new StoreNotFound()
 
-		return data[0]
+		return store.id
 	}
 
 	async createPaymentIntent(payment_data: PaymentInterface) {
-		this.canRun()
+		await this.canRun()
 
-		const store = await this.getStore(payment_data.receiving_store)
-		let r = (Math.random() + Math.floor(new Date().getTime() / 1000) + 1).toString(36).substring(7);
-		payment_data.payment_id = r
-		payment_data.store_id = store.id
+		let { receiving_store, ...intent } = payment_data
+		intent.pagesId = await this.getStore(receiving_store)
+		intent.transaction_hash = ''
 
-		let { receiving_store, ...payment } = payment_data
+		// console.log(intent)
 
-		const { data, error } = await supabase.from('payment_intents').insert([payment])
+		const data = await fetch(`http://wagpay.herokuapp.com/api/paymentIntents`, {
+			method: 'POST',
+			body: JSON.stringify(intent),
+			headers: {
+				'Content-Type': 'application/json',
+				'api_key': this.api_key
+			}
+		})
 
-		if(!data || error) {
-			console.log(error, "ERROR")
-			throw new CantCreatePaymentIntent()
-		}
+		const res = await data.json()
 
-		return data[0].payment_id
+		if(!res || data.status !== 201) throw new CantCreatePaymentIntent()
+
+		return res.id
 	}
 
 	async checkPayment(payment_id: string) {
-		setInterval(async () => {
-			const { data, error } = await supabase.from('payment_intents').select('*').eq('payment_id', payment_id)
-
-			if(!data || error) {
-				console.log(error, "ERROR")
-				throw new CantCreatePaymentIntent()
-			}
-
-			if(data[0].is_paid && data[0].transaction_hash) {
-				console.log('Paid')
-			} else {
-				console.log('Not Paid')
-			}
-		}, 5000)
+		return new Promise((resolve, reject) => {
+			this.canRun()
+	
+			let can_run = true
+	
+			setInterval(() => can_run = false, 10000)
+	
+			setInterval(async () => {
+				if(can_run) {
+					const data = await fetch(`http://wagpay.herokuapp.com/api/paymentIntents?id=${payment_id}`, {
+						method: 'GET',
+						headers: {
+							'api_key': this.api_key
+						}
+					})
+		
+					const res = await data.json()
+		
+					if(res[0].is_paid && res[0].transaction_hash) {
+						// console.log('paid')
+						resolve(true)
+					} else {
+						// console.log('not paid')
+					}
+				} else {
+					resolve(false)
+				}
+			}, 2000)
+		})
 	}
 }
 
@@ -105,15 +127,15 @@ class WagPay {
 // 	let pay: PaymentInterface = {
 // 		value: 20,
 // 		from_email: 'punekar.satyam@gmail.com',
-// 		currency: ['SOL'],
-// 		receiving_store: 'strings'
+// 		currency: ['solana'],
+// 		receiving_store: 'dsa'
 // 	}
 // 	console.log('Created Payment')
 	
 // 	console.log('Creating Payment Intent')
 // 	let id = await wag.createPaymentIntent(pay)
-// 	wag.checkPayment(id)
-// 	console.log('Created Payment Intent')
+// 	let check = await wag.checkPayment(id)
+// 	console.log('Created Payment Intent', check)
 // })()
 
 export default WagPay
