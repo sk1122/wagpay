@@ -1,6 +1,6 @@
 {
   "name": "wagpay",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@supabase/supabase-js": "^1.31.2"
+    "@supabase/supabase-js": "^1.31.2",
+    "cross-fetch": "^3.1.5"
   },
   "devDependencies": {
     "ts-node-dev": "^1.1.8"
