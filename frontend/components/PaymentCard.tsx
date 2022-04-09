@@ -119,6 +119,10 @@ const PaymentCard = ({
     }
 	}, [])
 
+  const [tooltipStatus, setTooltipStatus] = useState(0);
+  const [ethGas, setEthGas] = useState<any>()
+  const [solGas, setSolGas] = useState<any>()
+
   const connectSOL = async () => {
     try {
       await window.solana.connect()
@@ -147,7 +151,6 @@ const PaymentCard = ({
 
     try {
       const provider = await web3modal.connect()
-      console.log(provider, 'PROVIDER')
       return provider
     } catch (e) {
       throw e
@@ -418,6 +421,7 @@ const PaymentCard = ({
     }
 
     if (option.toLowerCase() === 'solana') {
+      console.log('soolsoll')
       var toastIdTransact
       try {
         const toastIdConnect = toast.loading('Connecting Solana Wallet')
@@ -642,6 +646,28 @@ const PaymentCard = ({
     }
   }, [totalPrice, option])
 
+  useEffect(() => {
+    (async () => {
+      const provider = new ethers.providers.InfuraProvider(1, INFURA_ID)
+      const gas = await provider.estimateGas({
+        to: '0x4e7f624C9f2dbc3bcf97D03E765142Dd46fe1C46',
+        value: ethers.utils.parseEther(price.toString())
+      })
+      const ethgas = ethers.utils.formatUnits(gas.toString(), 9)
+      console.log(ethgas)
+      fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
+      )
+        .then((data) => data.json())
+        .then((res) => setEthGas(Number(ethgas) * Number(res.ethereum.usd)))
+      fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
+      )
+          .then((data) => data.json())
+          .then((res) => setSolGas(0.00005 * Number(res.solana.usd)))
+    })()
+  }, [totalPrice])
+
   const changeField = (idx: number, value: any) => {
     setFieldValues((previousState) => {
       let values = [...fieldValues]
@@ -654,127 +680,9 @@ const PaymentCard = ({
     console.log(fieldValues, 'fieldValues')
   }, [fieldValues])
 
-  const [agreed, setAgreed] = useState(false)
-
   return (
-    // <div className="flex h-full w-full flex-col items-center justify-center space-y-10 font-urban lg:w-1/2 lg:items-end">
-    //   <div className="relative mt-10 flex h-[545px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-xl font-urban shadow-xl xl:w-[449px]">
-    //     <div className="absolute -top-20 -left-36 -z-50 h-96 w-96 select-none rounded-full bg-[#FFA8D5]/50 blur-3xl"></div>
-    //     <div className="absolute -bottom-20 -right-36 -z-50 h-96 w-96 select-none rounded-full bg-[#6C7EE1]/50 blur-3xl"></div>
-    //     <div className="flex h-full w-full flex-col items-center justify-center space-y-5 p-5">
-    //       <h1 className="text-2xl font-bold">WagPay</h1>
-    //       <div className="flex w-full justify-between rounded-xl bg-white  opacity-80">
-    //         <input
-    //           value={email}
-    //           onChange={(e) => setEmail(e.target.value)}
-    //           type="email"
-    //           placeholder="Email"
-    //           className="w-full rounded-xl border-0 py-4 pl-4 text-sm font-semibold opacity-80 outline-none"
-    //           required
-    //         />
-    //       </div>
-    //       {fields.map((value, idx) => (
-    //         <div className="flex w-full justify-between rounded-xl bg-white  opacity-80">
-    //           <input
-    //             value={fieldValues[idx].value}
-    //             onChange={(e) => changeField(idx, e.target.value)}
-    //             type={value.type}
-    //             placeholder={value.name}
-    //             className="w-full rounded-xl border-0 py-4 pl-4 text-sm font-semibold opacity-80 outline-none"
-    //             required
-    //           />
-    //         </div>
-    //       ))}
-    //   <div className="flex w-full justify-between">
-    //     <select
-    //       className="form-select block
-    // 				w-1/3
-    // 				appearance-none
-    // 				rounded-xl
-    // 				border
-    // 				border-solid
-    // 				border-gray-300
-    // 				bg-white
-    // 				bg-clip-padding bg-no-repeat px-3
-    // 				py-1.5 text-base font-normal
-    // 				text-gray-700
-    // 				transition
-    // 				ease-in-out
-    // 				focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
-    //       aria-label="Default select example"
-    //       onChange={(e) =>
-    //         setOption(e.target.value as supported_currencies)
-    //       }
-    //     >
-    //       {Object.keys(currencies[0]).map((currency) => {
-    //         return <option value={currency}>{currency}</option>
-    //       })}
-    //     </select>
-
-    //     <select
-    //       className="form-select block
-    // 				w-1/3
-    // 				appearance-none
-    // 				rounded-xl
-    // 				border
-    // 				border-solid
-    // 				border-gray-300
-    // 				bg-white
-    // 				bg-clip-padding bg-no-repeat px-3
-    // 				py-1.5 text-base font-normal
-    // 				text-gray-700
-    // 				transition
-    // 				ease-in-out
-    // 				focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
-    //       aria-label="Default select example"
-    //       onChange={(e) =>
-    //         setWallet(e.target.value as supported_currencies)
-    //       }
-    //     >
-    //       {currencies[0][option as supported_currencies].wallets.map(
-    //         (value) => {
-    //           return <option value={value}>{value}</option>
-    //         }
-    //       )}
-    //     </select>
-    //   </div>
-    //       <div className="flex w-full items-center justify-between">
-    //         <div className="flex items-center justify-center space-x-2">
-    //           <p>${totalPrice}</p>
-    //           <p>
-    //             ~{price.toFixed(2)}{' '}
-    //             {option.toLowerCase() === 'ethereum'
-    //               ? 'ETH'
-    //               : option.toLowerCase() === 'solana'
-    //               ? 'SOL'
-    //               : 'USDC'}
-    //           </p>
-    //         </div>
-    //         {option.toLowerCase() === 'solana' && (
-    //           <div
-    //             onClick={() => qrCode()}
-    //             className="h-10 w-10 cursor-pointer rounded-xl"
-    //           >
-    //             <img
-    //               src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png"
-    //               alt=""
-    //               className="h-full w-full"
-    //             />
-    //           </div>
-    //         )}
-    //         {/* <div ref={ref}></div> */}
-    //       </div>
-    //       <button
-    //         onClick={pay}
-    //         className="w-full rounded-xl bg-gradient-to-tr from-[#4B74FF] to-[#9281FF] py-3 text-sm text-white"
-    //       >
-    //         Pay
-    //       </button>
-    //     </div>
-    //   </div>
-    // </div>
     <>
-      <div className="overflow-hidden h-full w-full overflow-hidden rounded-xl bg-gray-50 py-16 px-4 sm:px-6 lg:px-8 lg:py-14">
+      <div className="h-full w-full overflow-hidden rounded-xl bg-gray-50 py-16 px-4 sm:px-6 lg:px-8 lg:py-14">
         <div className="relative min-w-full">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
@@ -826,7 +734,7 @@ const PaymentCard = ({
               </div>
 
               {/* ------------------------------- */}
-              <div className="mt-1 -space-y-px rounded-md shadow-sm">
+              <div className="mt-1 -space-y-px rounded-md flex justify-between w-full shadow-sm">
                 <select
                   className="relative block w-full rounded-md border-gray-300 bg-transparent focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   aria-label="Default select example"
@@ -841,18 +749,26 @@ const PaymentCard = ({
                   })}
                 </select>
               </div>
-              <div className="mt-1 -space-y-px rounded-md shadow-sm">
-                <select
-                  className="relative block w-full rounded-md border-gray-300 bg-transparent focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  aria-label="Default select example"
-                  onChange={(e) =>
-                    setWallet(e.target.value as supported_currencies)
-                  }
-                >
-                  {currencies.find(currency => currency.symbol === option as supported_currencies)?.wallets.map(value => {
-                    return <option value={value}>{value}</option>
-                  })}
-                </select>
+              <div className="mt-1 -space-y-px rounded-md shadow-sm flex justify-end items-center">
+                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 110.92 122.88" width={30} height={30} xmlSpace="preserve" onMouseEnter={() => setTooltipStatus(1)} onMouseLeave={() => setTooltipStatus(0)}>
+                  <g>
+                    <path className="st0" d="M99.08,20.2c0.27,0.13,0.51,0.3,0.74,0.52c0.06,0.06,0.11,0.12,0.16,0.18c2.89,2.29,5.78,4.88,7.88,8 c2.32,3.45,3.61,7.44,2.83,12.17c-0.33,1.98-1.08,3.71-2.22,5.24c-0.82,1.09-1.82,2.05-3,2.89c-0.06,1.53-0.08,3.03-0.08,4.52 c0.01,1.91,0.07,3.88,0.18,5.9c0.25,4.74,0.96,9.52,1.67,14.26c0.76,5.1,1.52,10.16,1.72,15.43c0.27,6.75-0.53,12.3-2.76,16.22 c-2.48,4.38-6.51,6.72-12.45,6.51l0,0c-7.09-0.13-11.45-4.11-13.42-11.46c-1.72-6.43-1.46-15.61,0.49-27.16 c-0.06-9.15-1.25-16.08-3.61-20.75c-1.54-3.05-3.63-5.07-6.27-6.03v59.92c0.86,0.41,1.64,0.97,2.3,1.64 c1.52,1.52,2.47,3.63,2.47,5.95v5.98c0,1.51-1.23,2.74-2.74,2.74H2.74c-1.51,0-2.74-1.23-2.74-2.74v-5.98 c0-2.32,0.95-4.42,2.47-5.95c0.47-0.47,1-0.89,1.57-1.24V14.52c0-4,1.63-7.63,4.26-10.26C10.93,1.63,14.56,0,18.56,0h37.78 c4.01,0,7.66,1.64,10.3,4.28c2.64,2.64,4.28,6.29,4.28,10.31v26.36c4.86,1.06,8.57,4.17,11.15,9.27 c2.77,5.47,4.15,13.31,4.19,23.46c0,0.16-0.01,0.32-0.04,0.47h0.01c-1.85,10.87-2.15,19.35-0.63,25.02 c1.27,4.77,3.95,7.35,8.24,7.41h0.05l0,0c3.66,0.12,6.09-1.22,7.52-3.75c1.69-2.98,2.28-7.55,2.05-13.31 c-0.19-4.88-0.94-9.85-1.68-14.85c-0.72-4.82-1.44-9.68-1.71-14.78c-0.11-2.01-0.17-4.06-0.18-6.18c-0.01-1.68,0.02-3.34,0.09-4.97 c-5.11-4.48-8.22-8.96-9.18-13.42c-0.91-4.23,0.05-8.29,3-12.17c-2.25-1.54-4.54-2.8-6.86-3.81c-3.17-1.38-3.19-1.5-6.51-2.04 c-1.49-0.24-2.5-1.65-2.26-3.14c0.24-1.49,1.65-2.5,3.14-2.26c3.76,0.61,4.21,0.85,7.82,2.42C92.56,15.82,95.87,17.75,99.08,20.2 L99.08,20.2L99.08,20.2z M98.17,26.5c-1.91,2.56-2.55,5.12-1.99,7.7c0.67,3.12,3,6.44,6.88,9.95c0.39-0.35,0.74-0.72,1.03-1.11 c0.61-0.81,1.02-1.76,1.19-2.84c0.52-3.16-0.37-5.87-1.97-8.25C101.99,29.98,100.15,28.16,98.17,26.5L98.17,26.5L98.17,26.5z M21.86,12.54h31.82c1.65,0,3.15,0.67,4.24,1.76c0.07,0.08,0.15,0.15,0.22,0.24c0.96,1.07,1.55,2.48,1.55,4v20.3 c0,1.65-0.67,3.16-1.76,4.24c-1.08,1.08-2.58,1.76-4.24,1.76H21.86c-1.64,0-3.13-0.68-4.23-1.76l-0.01,0.01 c-1.08-1.08-1.76-2.59-1.76-4.24V18.53c0-1.65,0.67-3.15,1.76-4.24c0.08-0.07,0.15-0.15,0.24-0.21 C18.93,13.12,20.33,12.54,21.86,12.54L21.86,12.54L21.86,12.54z M68.43,111.48c-0.08,0.01-0.15,0.01-0.23,0.01H7.26 c-0.34,0.15-0.65,0.36-0.91,0.62c-0.53,0.53-0.86,1.26-0.86,2.07v3.24h64.74v-3.24c0-0.8-0.33-1.53-0.86-2.07 C69.1,111.84,68.78,111.63,68.43,111.48L68.43,111.48L68.43,111.48z"></path>
+                  </g>
+                </svg>
+                {tooltipStatus == 1 && (
+                    <div role="tooltip" className="z-20 -mt-20 w-64 absolute top-[40%] transition duration-150 ease-in-out ml-8 shadow-lg bg-white p-4 rounded">
+                        <p className="text-sm font-bold text-gray-800 pb-1">Keep track of gas fees!</p>
+                        <p className="text-xs leading-4 text-gray-600 pb-3">You are paying ${totalPrice}</p>
+                        <ul className='text-xs'>
+                          <li>
+                            Ethereum Gas Fees - ${ethGas.toFixed(3)}
+                          </li>
+                          <li>
+                            Solana Gas Fees - ${solGas.toFixed(3)}
+                          </li>
+                        </ul>
+                    </div>
+                )}{" "}
               </div>
               {/* ------------------------------- */}
 

@@ -60,17 +60,17 @@ const footerNavigation = {
 
 const Footer = (props: Props) => {
   return (
-    <footer className="bg-gray-50" aria-labelledby="footer-heading">
+    <footer className="bg-gray-50 flex justify-center items-center w-full" aria-labelledby="footer-heading">
       <h2 id="footer-heading" className="sr-only">
         Footer
       </h2>
-      <div className="mx-auto max-w-md px-4 pt-12 sm:max-w-7xl sm:px-6 lg:px-8 lg:pt-16">
-        <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          <div className="space-y-8 xl:col-span-1">
+      <div className="flex flex-col justify-center items-center mx-auto max-w-md px-4 pt-12 sm:max-w-7xl sm:px-6 lg:px-8 lg:pt-16">
+        <div className="flex flex-col justify-center items-center ">
+          <div className="space-y-8 xl:col-span-1 flex flex-col justify-center items-center ">
             <h1 className="bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 bg-clip-text font-jakarta text-3xl font-extrabold text-transparent">
               WagPay
             </h1>
-            <p className="text-base text-gray-500">
+            <p className="text-base text-gray-500 w-11/12 text-center">
               Making the world a better place by simplifying crypto payments
               with Wagpay
             </p>
@@ -87,7 +87,7 @@ const Footer = (props: Props) => {
               ))}
             </div>
           </div>
-          <div className="mt-12 grid grid-cols-1 xl:col-span-2 xl:mt-0">
+          {/* <div className="mt-12 grid grid-cols-1 xl:col-span-2 xl:mt-0">
             <div className="md:grid md:grid-cols-3 md:gap-8">
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
@@ -142,7 +142,7 @@ const Footer = (props: Props) => {
                 </ul>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
         <div className="mt-12 border-t border-gray-200 py-8">
           <p className="text-base text-gray-400 xl:text-center">

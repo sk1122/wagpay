@@ -38,6 +38,7 @@ interface Page {
   visits: number
   products: ProductInterface[]
   fields: any[]
+  webhook_urls: string[]
 }
 
 interface Props {
