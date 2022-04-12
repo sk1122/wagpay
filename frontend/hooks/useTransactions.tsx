@@ -7,7 +7,7 @@ const useTransactions = () => {
 	const [totalEarned, setTotalEarned] = useState(0)
 
 	async function getTransactions(cursor?: number) {
-		const data = await fetch(`http://wagpay.herokuapp.com/api/submissions/?cursor=${cursor?.toString()}`, {
+		const data = await fetch(`http://localhost:2000/api/submissions/?cursor=${cursor?.toString()}`, {
 			headers: {
 				'bearer-token': supabase.auth.session()?.access_token as string,
 			},
@@ -43,7 +43,7 @@ const useTransactions = () => {
 		  total_prices: total_prices
 		}
 
-		const data = await fetch('http://wagpay.herokuapp.com/api/submissions/', {
+		const data = await fetch('http://localhost:2000/api/submissions/', {
 		  method: 'POST',
 		  body: JSON.stringify(transaction),
 		  headers: {

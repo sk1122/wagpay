@@ -1,6 +1,8 @@
 import fetch from 'cross-fetch'
 type supported_currencies = 'ethereum' | 'solana' | 'usdceth' | 'usdcsol'
 
+const BASE_URL = 'http://localhost:2000'
+
 interface PaymentInterface {
 	value: number
 	transaction_hash?: string
@@ -33,7 +35,7 @@ class WagPay {
 	}
 
 	async isValidAPIKey(api_key: string) {
-		const data = await fetch(`http://wagpay.herokuapp.com/api/user/apiKey/${api_key}`)
+		const data = await fetch(`${BASE_URL}/api/user/apiKey/${api_key}`)
 		const res = await data.json()
 		// console.log(res, data.status, "Dsa")
 		if(data.status === 400) return false
@@ -52,7 +54,7 @@ class WagPay {
 	async getStore(store_slug: string) {
 		await this.canRun()
 
-		const data = await fetch(`http://wagpay.herokuapp.com/api/pages/get?slug=${store_slug}&username=${this.user.username}`)
+		const data = await fetch(`${BASE_URL}/api/pages/get?slug=${store_slug}&username=${this.user.username}`)
 		const store = await data.json()
 
 		if(!store) throw new StoreNotFound()
@@ -69,7 +71,7 @@ class WagPay {
 
 		// console.log(intent)
 
-		const data = await fetch(`http://wagpay.herokuapp.com/api/paymentIntents`, {
+		const data = await fetch(`${BASE_URL}/api/paymentIntents`, {
 			method: 'POST',
 			body: JSON.stringify(intent),
 			headers: {
@@ -82,6 +84,7 @@ class WagPay {
 
 		if(!res || data.status !== 201) throw new CantCreatePaymentIntent()
 
+		console.log(res.id, "idididididi")
 		return res.id
 	}
 
@@ -91,11 +94,11 @@ class WagPay {
 	
 			let can_run = true
 	
-			setInterval(() => can_run = false, 10000)
+			setInterval(() => can_run = false, 1000000)
 	
 			setInterval(async () => {
 				if(can_run) {
-					const data = await fetch(`http://wagpay.herokuapp.com/api/paymentIntents?id=${payment_id}`, {
+					const data = await fetch(`${BASE_URL}/api/paymentIntents?id=${payment_id}`, {
 						method: 'GET',
 						headers: {
 							'api_key': this.api_key
@@ -118,24 +121,24 @@ class WagPay {
 	}
 }
 
-// (async () => {
-// 	console.log('Initiating')
-// 	const wag = new WagPay('123')
-// 	console.log('Initiatied')
+(async () => {
+	console.log('Initiating')
+	const wag = new WagPay('123')
+	console.log('Initiatied')
 	
-// 	console.log('Creating Payment')
-// 	let pay: PaymentInterface = {
-// 		value: 20,
-// 		from_email: 'punekar.satyam@gmail.com',
-// 		currency: ['solana'],
-// 		receiving_store: 'dsa'
-// 	}
-// 	console.log('Created Payment')
+	console.log('Creating Payment')
+	let pay: PaymentInterface = {
+		value: 20,
+		from_email: 'punekar.satyam@gmail.com',
+		currency: ['solana'],
+		receiving_store: 'dsa'
+	}
+	console.log('Created Payment')
 	
-// 	console.log('Creating Payment Intent')
-// 	let id = await wag.createPaymentIntent(pay)
-// 	let check = await wag.checkPayment(id)
-// 	console.log('Created Payment Intent', check)
-// })()
+	console.log('Creating Payment Intent')
+	let id = await wag.createPaymentIntent(pay)
+	let check = await wag.checkPayment(id)
+	console.log('Created Payment Intent', check)
+})()
 
 export default WagPay
