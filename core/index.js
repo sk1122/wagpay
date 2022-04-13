@@ -48,6 +48,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 exports.__esModule = true;
 var cross_fetch_1 = require("cross-fetch");
+var BASE_URL = 'http://wagpay.herokuapp.com';
 var APIKeyInvalid = /** @class */ (function () {
     function APIKeyInvalid() {
     }
@@ -70,18 +71,12 @@ var WagPay = /** @class */ (function () {
     }
     WagPay.prototype.check_first = function (api_key) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = console).log;
-                        return [4 /*yield*/, this.isValidAPIKey(api_key)];
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.isValidAPIKey(api_key)];
                     case 1:
-                        _b.apply(_a, [_c.sent()]);
-                        return [4 /*yield*/, this.isValidAPIKey(api_key)];
-                    case 2:
-                        if (!(_c.sent())) {
-                            console.log('da');
+                        // console.log(await this.isValidAPIKey(api_key))
+                        if (!(_a.sent())) {
                             throw new APIKeyInvalid();
                         }
                         this.can_run = true;
@@ -95,13 +90,15 @@ var WagPay = /** @class */ (function () {
             var data, res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, cross_fetch_1["default"])("http://wagpay.herokuapp.com/api/user/apiKey/".concat(api_key))];
+                    case 0: return [4 /*yield*/, (0, cross_fetch_1["default"])("".concat(BASE_URL, "/api/user/apiKey/").concat(api_key))];
                     case 1:
                         data = _a.sent();
-                        return [4 /*yield*/, data.json()];
+                        return [4 /*yield*/, data.json()
+                            // console.log(res, data.status, "Dsa")
+                        ];
                     case 2:
                         res = _a.sent();
-                        console.log(res, data.status, "Dsa");
+                        // console.log(res, data.status, "Dsa")
                         if (data.status === 400)
                             return [2 /*return*/, false];
                         this.user = res;
@@ -132,12 +129,14 @@ var WagPay = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.canRun()];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, (0, cross_fetch_1["default"])("http://wagpay.herokuapp.com/api/pages/get?slug=".concat(store_slug, "&username=").concat(this.user.username))];
+                        return [4 /*yield*/, (0, cross_fetch_1["default"])("".concat(BASE_URL, "/api/pages/get?slug=").concat(store_slug, "&username=").concat(this.user.username))];
                     case 2:
                         data = _a.sent();
                         return [4 /*yield*/, data.json()];
                     case 3:
                         store = _a.sent();
+                        if (!store)
+                            throw new StoreNotFound();
                         return [2 /*return*/, store.id];
                 }
             });
@@ -157,8 +156,7 @@ var WagPay = /** @class */ (function () {
                     case 2:
                         _a.pagesId = _b.sent();
                         intent.transaction_hash = '';
-                        console.log(intent);
-                        return [4 /*yield*/, (0, cross_fetch_1["default"])("http://wagpay.herokuapp.com/api/paymentIntents", {
+                        return [4 /*yield*/, (0, cross_fetch_1["default"])("".concat(BASE_URL, "/api/paymentIntents"), {
                                 method: 'POST',
                                 body: JSON.stringify(intent),
                                 headers: {
@@ -173,6 +171,7 @@ var WagPay = /** @class */ (function () {
                         res = _b.sent();
                         if (!res || data.status !== 201)
                             throw new CantCreatePaymentIntent();
+                        console.log(res.id, "idididididi");
                         return [2 /*return*/, res.id];
                 }
             });
@@ -182,58 +181,65 @@ var WagPay = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                setInterval(function () { return __awaiter(_this, void 0, void 0, function () {
-                    var data;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0: return [4 /*yield*/, (0, cross_fetch_1["default"])("http://wagpay.herokuapp.com/api/paymentIntents?id=".concat(payment_id), {
-                                    method: 'GET',
-                                    headers: {
-                                        'api_key': this.api_key
-                                    }
-                                })];
-                            case 1:
-                                data = _a.sent();
-                                if (data[0].is_paid && data[0].transaction_hash) {
-                                    console.log("Paid");
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        _this.canRun();
+                        var can_run = true;
+                        setInterval(function () { return can_run = false; }, 1000000);
+                        setInterval(function () { return __awaiter(_this, void 0, void 0, function () {
+                            var data, res;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        if (!can_run) return [3 /*break*/, 3];
+                                        return [4 /*yield*/, (0, cross_fetch_1["default"])("".concat(BASE_URL, "/api/paymentIntents?id=").concat(payment_id), {
+                                                method: 'GET',
+                                                headers: {
+                                                    'api_key': this.api_key
+                                                }
+                                            })];
+                                    case 1:
+                                        data = _a.sent();
+                                        return [4 /*yield*/, data.json()];
+                                    case 2:
+                                        res = _a.sent();
+                                        if (res[0].is_paid && res[0].transaction_hash) {
+                                            // console.log('paid')
+                                            resolve(true);
+                                        }
+                                        else {
+                                            // console.log('not paid')
+                                        }
+                                        return [3 /*break*/, 4];
+                                    case 3:
+                                        resolve(false);
+                                        _a.label = 4;
+                                    case 4: return [2 /*return*/];
                                 }
-                                else {
-                                    console.log("Not Paid");
-                                }
-                                return [2 /*return*/];
-                        }
-                    });
-                }); }, 2000);
-                return [2 /*return*/];
+                            });
+                        }); }, 2000);
+                    })];
             });
         });
     };
     return WagPay;
 }());
-(function () { return __awaiter(void 0, void 0, void 0, function () {
-    var wag, pay, id;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                console.log('Initiating');
-                wag = new WagPay('123');
-                console.log('Initiatied');
-                console.log('Creating Payment');
-                pay = {
-                    value: 20,
-                    from_email: 'punekar.satyam@gmail.com',
-                    currency: ['solana'],
-                    receiving_store: 'dsa'
-                };
-                console.log('Created Payment');
-                console.log('Creating Payment Intent');
-                return [4 /*yield*/, wag.createPaymentIntent(pay)];
-            case 1:
-                id = _a.sent();
-                wag.checkPayment(id);
-                console.log('Created Payment Intent');
-                return [2 /*return*/];
-        }
-    });
-}); })();
-exports["default"] = WagPay;
+// (async () => {
+// 	console.log('Initiating')
+// 	const wag = new WagPay('123')
+// 	console.log('Initiatied')
+// 	console.log('Creating Payment')
+// 	let pay: PaymentInterface = {
+// 		value: 20,
+// 		from_email: 'punekar.satyam@gmail.com',
+// 		currency: ['solana'],
+// 		receiving_store: 'dsa'
+// 	}
+// 	console.log('Created Payment')
+// 	console.log('Creating Payment Intent')
+// 	let id = await wag.createPaymentIntent(pay)
+// 	let check = await wag.checkPayment(id)
+// 	console.log('Created Payment Intent', check)
+// })()
+module.exports = {
+    WagPay
+};

@@ -1,7 +1,7 @@
 import fetch from 'cross-fetch'
 type supported_currencies = 'ethereum' | 'solana' | 'usdceth' | 'usdcsol'
 
-const BASE_URL = 'http://localhost:2000'
+const BASE_URL = 'http://wagpay.herokuapp.com'
 
 interface PaymentInterface {
 	value: number
@@ -17,7 +17,7 @@ class APIKeyInvalid {}
 class StoreNotFound {}
 class CantCreatePaymentIntent {}
 
-class WagPay {
+export class WagPay {
 	private api_key
 	private user: any
 	private can_run = false
@@ -66,7 +66,7 @@ class WagPay {
 		await this.canRun()
 
 		let { receiving_store, ...intent } = payment_data
-		intent.pagesId = await this.getStore(receiving_store)
+		intent.pagesId = await this.getStore(receiving_store as string)
 		intent.transaction_hash = ''
 
 		// console.log(intent)
@@ -121,24 +121,22 @@ class WagPay {
 	}
 }
 
-(async () => {
-	console.log('Initiating')
-	const wag = new WagPay('123')
-	console.log('Initiatied')
+// (async () => {
+// 	console.log('Initiating')
+// 	const wag = new WagPay('123')
+// 	console.log('Initiatied')
 	
-	console.log('Creating Payment')
-	let pay: PaymentInterface = {
-		value: 20,
-		from_email: 'punekar.satyam@gmail.com',
-		currency: ['solana'],
-		receiving_store: 'dsa'
-	}
-	console.log('Created Payment')
+// 	console.log('Creating Payment')
+// 	let pay: PaymentInterface = {
+// 		value: 20,
+// 		from_email: 'punekar.satyam@gmail.com',
+// 		currency: ['solana'],
+// 		receiving_store: 'dsa'
+// 	}
+// 	console.log('Created Payment')
 	
-	console.log('Creating Payment Intent')
-	let id = await wag.createPaymentIntent(pay)
-	let check = await wag.checkPayment(id)
-	console.log('Created Payment Intent', check)
-})()
-
-export default WagPay
+// 	console.log('Creating Payment Intent')
+// 	let id = await wag.createPaymentIntent(pay)
+// 	let check = await wag.checkPayment(id)
+// 	console.log('Created Payment Intent', check)
+// })()

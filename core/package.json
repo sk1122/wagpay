@@ -1,9 +1,10 @@
 {
   "name": "wagpay",
-  "version": "1.0.1",
-  "description": "",
+  "version": "1.0.2",
+  "description": "WagPay is a payment gateway for crypto payments",
   "main": "index.js",
   "scripts": {
+    "tsc": "tsc",
     "dev": "ts-node-dev --respawn --transpile-only WagPay.ts"
   },
   "author": "",
