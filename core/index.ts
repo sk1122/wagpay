@@ -1,7 +1,7 @@
 import fetch from 'cross-fetch'
 type supported_currencies = 'ethereum' | 'solana' | 'usdceth' | 'usdcsol'
 
-const BASE_URL = 'http://wagpay.herokuapp.com'
+const BASE_URL = 'https://wagpay.club'
 
 interface PaymentInterface {
 	value: number

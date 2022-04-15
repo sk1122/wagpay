@@ -1,6 +1,6 @@
 {
   "name": "wagpay",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "WagPay is a payment gateway for crypto payments",
   "main": "index.js",
   "scripts": {

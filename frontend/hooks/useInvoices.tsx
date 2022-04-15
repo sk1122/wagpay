@@ -7,7 +7,7 @@ const useInvoices = () => {
 
 	async function getInvoices(cursor?: number) {
 		if(!cursor) {
-			const data = await fetch('http://wagpay.herokuapp.com/api/invoices/', {
+			const data = await fetch('https://wagpay.club/api/invoices/', {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -15,7 +15,7 @@ const useInvoices = () => {
 			const res = await data.json()
 			setInvoices(res)
 		} else {
-			const data = await fetch(`http://wagpay.herokuapp.com/api/invoices?cursor=${cursor.toString()}`, {
+			const data = await fetch(`https://wagpay.club/api/invoices?cursor=${cursor.toString()}`, {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -26,7 +26,7 @@ const useInvoices = () => {
 	}
 
 	async function createInvoices(invoice: Invoice) {
-		var data = await fetch('http://wagpay.herokuapp.com/api/invoices/', {
+		var data = await fetch('https://wagpay.club/api/invoices/', {
 			method: 'POST',
 			body: JSON.stringify(invoice),
 			headers: {

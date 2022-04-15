@@ -45,7 +45,7 @@ const currencies = [
 ]
 
 const updateIntent = async (intent_data: object) => {
-  const data = await fetch(`http://localhost:2000/api/paymentIntents/`, {
+  const data = await fetch(`https://wagpay.club/api/paymentIntents/`, {
     method: 'PATCH',
     body: JSON.stringify(intent_data),
     headers: {
@@ -56,7 +56,7 @@ const updateIntent = async (intent_data: object) => {
 }
 
 export const getServerSideProps = async (context: any) => {
-	const data = await fetch(`http://localhost:2000/api/paymentIntents/${context.params.id}`)
+	const data = await fetch(`https://wagpay.club/api/paymentIntents/${context.params.id}`)
 	if(data.status == 400) {
 		return {
 			props: {

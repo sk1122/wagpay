@@ -48,7 +48,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 exports.__esModule = true;
 var cross_fetch_1 = require("cross-fetch");
-var BASE_URL = 'http://wagpay.herokuapp.com';
+var BASE_URL = 'https://wagpay.club';
 var APIKeyInvalid = /** @class */ (function () {
     function APIKeyInvalid() {
     }

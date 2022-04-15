@@ -124,7 +124,7 @@ export default function Dashboard() {
 
   const totalVisits = async () => {
     if (running) {
-      const data = await fetch(`http://wagpay.herokuapp.com/api/pages/total_visits`, {
+      const data = await fetch(`https://wagpay.club/api/pages/total_visits`, {
         headers: {
           'bearer-token': supabase.auth.session()?.access_token as string,
         },
