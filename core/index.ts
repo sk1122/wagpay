@@ -76,12 +76,12 @@ export class WagPay {
 			body: JSON.stringify(intent),
 			headers: {
 				'Content-Type': 'application/json',
-				'api_key': this.api_key
+				'api-key': '123'
 			}
 		})
 
 		const res = await data.json()
-
+		console.log(res)
 		if(!res || data.status !== 201) throw new CantCreatePaymentIntent()
 
 		console.log(res.id, "idididididi")
@@ -101,7 +101,7 @@ export class WagPay {
 					const data = await fetch(`${BASE_URL}/api/paymentIntents?id=${payment_id}`, {
 						method: 'GET',
 						headers: {
-							'api_key': this.api_key
+							'api-key': this.api_key
 						}
 					})
 		
@@ -121,22 +121,22 @@ export class WagPay {
 	}
 }
 
-// (async () => {
-// 	console.log('Initiating')
-// 	const wag = new WagPay('123')
-// 	console.log('Initiatied')
+(async () => {
+	console.log('Initiating')
+	const wag = new WagPay('123')
+	console.log('Initiatied')
 	
-// 	console.log('Creating Payment')
-// 	let pay: PaymentInterface = {
-// 		value: 20,
-// 		from_email: 'punekar.satyam@gmail.com',
-// 		currency: ['solana'],
-// 		receiving_store: 'dsa'
-// 	}
-// 	console.log('Created Payment')
+	console.log('Creating Payment')
+	let pay: PaymentInterface = {
+		value: 1,
+		from_email: 'punekar.satyam@gmail.com',
+		currency: ['solana'],
+		receiving_store: 'dsa'
+	}
+	console.log('Created Payment')
 	
-// 	console.log('Creating Payment Intent')
-// 	let id = await wag.createPaymentIntent(pay)
-// 	let check = await wag.checkPayment(id)
-// 	console.log('Created Payment Intent', check)
-// })()
+	console.log('Creating Payment Intent')
+	let id = await wag.createPaymentIntent(pay)
+	let check = await wag.checkPayment(id)
+	console.log('Created Payment Intent', check)
+})()
