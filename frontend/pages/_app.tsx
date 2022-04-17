@@ -25,10 +25,23 @@ import {
   WalletMultiButton,
 } from '@solana/wallet-adapter-react-ui'
 import { clusterApiUrl } from '@solana/web3.js'
-import { useMemo } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Toaster } from 'react-hot-toast'
+import { AppContext, useAccountContext } from './_context'
 // Default styles that can be overridden by your app
 require('@solana/wallet-adapter-react-ui/styles.css')
+import mainnet from '../config/mainnet'
+import testnet from '../config/testnet'
+import QRCodeStyling, {
+  DrawType,
+  TypeNumber,
+  Mode,
+  ErrorCorrectionLevel,
+  DotType,
+  CornerSquareType,
+  CornerDotType,
+  Options,
+} from 'qr-code-styling'
 
 const infuraId = 'a618bb907c2f4670a721be9cd51f388e'
 
@@ -68,13 +81,7 @@ declare global {
 
 function MyApp({ Component, pageProps }: AppProps) {
   const network = WalletAdapterNetwork.Devnet
-
-  // You can also provide a custom RPC endpoint.
   const endpoint = useMemo(() => clusterApiUrl(network), [network])
-
-  // @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking and lazy loading --
-  // Only the wallets you configure here will be compiled into your application, and only the dependencies
-  // of wallets that your users connect to will be loaded.
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
@@ -88,17 +95,146 @@ function MyApp({ Component, pageProps }: AppProps) {
     [network]
   )
 
+  const [config, setConfig] = useState<any>()
+
+  useEffect(() => {
+    const { NEXT_PUBLIC_ENV } = process.env
+    console.log(mainnet, testnet)
+    if(NEXT_PUBLIC_ENV == 'mainnet') {
+      setConfig(mainnet)
+    } else {
+      setConfig(testnet)
+    }
+  }, [])
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [qrCode, setQrCode] = useState(
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png'
+  )
+  const [url, setUrl] = useState('https://qr-code-styling.com')
+
+  const [options, setOptions] = useState<Options>({
+    width: 300,
+    height: 300,
+    type: 'svg' as DrawType,
+    data: '',
+    image: '/spay.svg',
+    margin: 10,
+    qrOptions: {
+      typeNumber: 0 as TypeNumber,
+      mode: 'Byte' as Mode,
+      errorCorrectionLevel: 'Q' as ErrorCorrectionLevel,
+    },
+    imageOptions: {
+      hideBackgroundDots: true,
+      imageSize: 0.3,
+      margin: 10,
+      crossOrigin: 'anonymous',
+    },
+    dotsOptions: {
+      color: '#222222',
+      // gradient: {
+      //   type: 'linear', // 'radial'
+      //   rotation: 0,
+      //   colorStops: [{ offset: 0, color: '#8688B2' }, { offset: 1, color: '#77779C' }]
+      // },
+      type: 'rounded' as DotType,
+    },
+    backgroundOptions: {
+      color: '#fff',
+      // gradient: {
+      //   type: 'linear', // 'radial'
+      //   rotation: 0,
+      //   colorStops: [{ offset: 0, color: '#ededff' }, { offset: 1, color: '#e6e7ff' }]
+      // },
+    },
+    cornersSquareOptions: {
+      color: '#222222',
+      type: 'extra-rounded' as CornerSquareType,
+      // gradient: {
+      //   type: 'linear', // 'radial'
+      //   rotation: 180,
+      //   colorStops: [{ offset: 0, color: '#25456e' }, { offset: 1, color: '#4267b2' }]
+      // },
+    },
+    cornersDotOptions: {
+      color: '#222222',
+      type: 'dot' as CornerDotType,
+      // gradient: {
+      //   type: 'linear', // 'radial'
+      //   rotation: 180,
+      //   colorStops: [{ offset: 0, color: '#00266e' }, { offset: 1, color: '#4060b3' }]
+      // },
+    },
+  })
+
+  const [qrCodes, setQrCodes] = useState<QRCodeStyling>()
+  const ref = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    if (typeof window !== 'undefined') {
+      const QRCodeStyling = require('qr-code-styling')
+      setQrCodes(new QRCodeStyling(options))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!qrCodes) return
+    if (ref.current) {
+      qrCodes.append(ref.current)
+    }
+  }, [qrCodes, ref])
+
+  useEffect(() => {
+    if (!qrCodes) return
+    qrCodes.update(options)
+  }, [qrCodes, options])
+
+  const onDataChange = (url: string) => {
+    if (!qrCodes) return
+    setOptions((options) => ({
+      ...options,
+      data: url,
+    }))
+  }
+
+  useEffect(() => {
+    console.log(isModalOpen)
+    console.log(url)
+    onDataChange(url)
+  }, [url])
+
+  let sharedState = {
+    config,
+    qrCode,
+    qrCodes,
+    url,
+    setUrl,
+    isModalOpen,
+    setIsModalOpen,
+    setQrCode,
+    ref
+  }
+
   return (
-    <Provider autoConnect connectors={connectors}>
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets}>
-          <WalletModalProvider>
-            <Toaster />
-            <Component {...pageProps} />
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
-    </Provider>
+    <AppContext.Provider value={sharedState}>
+      <Provider autoConnect connectors={connectors}>
+        <ConnectionProvider endpoint={endpoint}>
+          <WalletProvider wallets={wallets}>
+            <WalletModalProvider>
+              <Toaster />
+              <div className={(isModalOpen ? "" : "hidden") + "w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
+                <div className={(isModalOpen ? "" : "hidden") + " absolute bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
+                  <p className='text-white'>Scan this code to pay with any solana mobile wallet</p>
+                  <div ref={ref}></div>
+                </div>
+              </div>
+              <Component {...pageProps} />
+            </WalletModalProvider>
+          </WalletProvider>
+        </ConnectionProvider>
+      </Provider>
+    </AppContext.Provider>
   )
 }
 

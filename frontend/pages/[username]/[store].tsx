@@ -6,22 +6,8 @@ import { useEffect } from 'react'
 import { supabase } from '../../supabase'
 import { useRouter } from 'next/router'
 import { Product as ProductInterface } from '../api/product'
-import QRCodeStyling, {
-  DrawType,
-  TypeNumber,
-  Mode,
-  ErrorCorrectionLevel,
-  DotType,
-  CornerSquareType,
-  CornerDotType,
-  Options,
-} from 'qr-code-styling'
-
-import {
-  PlusIcon,
-  MinusIcon
-} from '@heroicons/react/solid'
 import useTransactions from '../../hooks/useTransactions'
+import { useAccountContext } from '../_context'
 
 interface Page {
   id: number
@@ -62,8 +48,17 @@ export const getServerSideProps = async (context: any) => {
 }
 
 const Store = ({ store }: Props) => {
-  console.log(store)
   const { query } = useRouter()
+  const {
+    qrCode,
+    qrCodes,
+    url,
+    setUrl,
+    isModalOpen,
+    setIsModalOpen,
+    setQrCode,
+    ref
+  } = useAccountContext()
 
   const updateVisit = async () => {
     console.log(store.id)
@@ -96,16 +91,11 @@ const Store = ({ store }: Props) => {
     }
   }, [])
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [qrCode, setQrCode] = useState(
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png'
-  )
   const [selectedProducts, setSelectedProducts] = useState<ProductInterface[]>(
     []
   )
   const [totalPrice, setTotalPrice] = useState(0)
   const [selectProducts, setSelectProducts] = useState(false)
-  const [url, setUrl] = useState('https://qr-code-styling.com')
 
   useEffect(() => console.log(qrCode), [qrCode])
 
@@ -160,108 +150,13 @@ const Store = ({ store }: Props) => {
     console.log(res)
   }
 
-  const [options, setOptions] = useState<Options>({
-    width: 300,
-    height: 300,
-    type: 'svg' as DrawType,
-    data: '',
-    image: '/spay.svg',
-    margin: 10,
-    qrOptions: {
-      typeNumber: 0 as TypeNumber,
-      mode: 'Byte' as Mode,
-      errorCorrectionLevel: 'Q' as ErrorCorrectionLevel,
-    },
-    imageOptions: {
-      hideBackgroundDots: true,
-      imageSize: 0.3,
-      margin: 10,
-      crossOrigin: 'anonymous',
-    },
-    dotsOptions: {
-      color: '#222222',
-      // gradient: {
-      //   type: 'linear', // 'radial'
-      //   rotation: 0,
-      //   colorStops: [{ offset: 0, color: '#8688B2' }, { offset: 1, color: '#77779C' }]
-      // },
-      type: 'rounded' as DotType,
-    },
-    backgroundOptions: {
-      color: '#fff',
-      // gradient: {
-      //   type: 'linear', // 'radial'
-      //   rotation: 0,
-      //   colorStops: [{ offset: 0, color: '#ededff' }, { offset: 1, color: '#e6e7ff' }]
-      // },
-    },
-    cornersSquareOptions: {
-      color: '#222222',
-      type: 'extra-rounded' as CornerSquareType,
-      // gradient: {
-      //   type: 'linear', // 'radial'
-      //   rotation: 180,
-      //   colorStops: [{ offset: 0, color: '#25456e' }, { offset: 1, color: '#4267b2' }]
-      // },
-    },
-    cornersDotOptions: {
-      color: '#222222',
-      type: 'dot' as CornerDotType,
-      // gradient: {
-      //   type: 'linear', // 'radial'
-      //   rotation: 180,
-      //   colorStops: [{ offset: 0, color: '#00266e' }, { offset: 1, color: '#4060b3' }]
-      // },
-    },
-  })
-
-  const [qrCodes, setQrCodes] = useState<QRCodeStyling>()
-  const ref = useRef<HTMLDivElement>(null)
-
-  useLayoutEffect(() => {
-    if (typeof window !== 'undefined') {
-      const QRCodeStyling = require('qr-code-styling')
-      setQrCodes(new QRCodeStyling(options))
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!qrCodes) return
-    if (ref.current) {
-      qrCodes.append(ref.current)
-    }
-  }, [qrCodes, ref])
-
-  useEffect(() => {
-    if (!qrCodes) return
-    qrCodes.update(options)
-  }, [qrCodes, options])
-
-  const onDataChange = (url: string) => {
-    if (!qrCodes) return
-    setOptions((options) => ({
-      ...options,
-      data: url,
-    }))
-  }
-
-  useEffect(() => {
-    console.log(isModalOpen)
-    console.log(url)
-    onDataChange(url)
-  }, [url])
+  
 
   return (
     <div className="w-full min-h-screen bg-gray-900 font-inter">
       <Head>
         <title>{store.title} - WagPay</title>
       </Head>
-      <div className={(isModalOpen ? "" : "hidden") + "w-full h-full backdrop-blur-sm absolute z-50"} onClick={() => setIsModalOpen(false)}>
-        <div className={(isModalOpen ? "" : "hidden") + " absolute bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent w-64 h-64"}>
-				  <p className='text-white'>Scan this code to pay with any solana mobile wallet</p>
-          <div ref={ref}></div>
-				</div>
-			</div>
       <main className="mx-auto max-w-2xl px-4 pt-16 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="flex justify-center items-start flex-col space-y-3">
           <h1 className="text-white font-jakarta text-3xl font-extrabold tracking-tight sm:text-4xl">

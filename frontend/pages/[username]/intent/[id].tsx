@@ -16,10 +16,13 @@ import {
   TOKEN_PROGRAM_ID,
   createTransferInstruction,
 } from '@solana/spl-token'
+import useEthereum from "../../../hooks/useEthereum"
+import { useAccountContext } from "../../_context"
+import useSolana from "../../../hooks/useSolana"
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
-type supported_currencies = 'ethereum' | 'solana' | 'USDC (Ethereum)' | 'USDC (Solana)'
+type supported_currencies = 'ethereum' | 'solana' | 'usdceth' | 'usdcsol'
 
 const currencies = [
 	{
@@ -28,7 +31,7 @@ const currencies = [
 		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
 	},
 	{
-		symbol: 'USDC (ETH)',
+		symbol: 'usdceth',
 		name: 'USDC (Ethereum)',
 		wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
 	},
@@ -38,7 +41,7 @@ const currencies = [
 		wallets: ['Phantom']
 	},
 	{
-		symbol: 'USDCSOL',
+		symbol: 'usdcsol',
 		name: 'USDC (Solana)',
 		wallets: ['Phantom']
 	}
@@ -81,8 +84,21 @@ interface Props {
 }
 
 const Intent = ({ intent }: Props) => {
-	console.log(intent, "INTENT")
+  const {
+    qrCode,
+    qrCodes,
+    url,
+    setUrl,
+    isModalOpen,
+    setIsModalOpen,
+    setQrCode,
+    ref
+  } = useAccountContext()
+
   const [transactions, getTransactions, createTransaction] = useTransactions()
+  const [signer, address, connectETH, payETH, payERC20] = useEthereum()
+  const [publicKey, connectSOL, paySOL, paySPL, qrCodeSOL, qrCodeSPL] = useSolana()
+  const { config } = useAccountContext()
 
 	const { query } = useRouter()
 	useEffect(() => {
@@ -93,47 +109,12 @@ const Intent = ({ intent }: Props) => {
 	}, [])
 
   const [tooltipStatus, setTooltipStatus] = useState(0);
+  const [sol, setSOL] = useState('')
   const [ethGas, setEthGas] = useState<any>()
   const [solGas, setSolGas] = useState<any>()
 
-  const connectSOL = async () => {
-    try {
-      await window.solana.connect()
-      setSOL(window.solana.publicKey.toString())
-    } catch (e) {
-      throw e
-    }
-  }
-
-  const connectETH = async () => {
-    const providerOptions = {
-      walletconnect: {
-        package: WalletConnectProvider, // required
-        options: {
-          infuraId: INFURA_ID, // required
-        },
-      },
-      authereum: {
-        package: Authereum, // required
-      },
-    }
-
-    const web3modal = new Web3Modal({
-      providerOptions,
-    })
-
-    try {
-      const provider = await web3modal.connect()
-      return provider
-    } catch (e) {
-      throw e
-    }
-  }
-
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
-  const [eth, setETH] = useState('')
-  const [sol, setSOL] = useState('')
   const [option, setOption] = useState<supported_currencies>(intent.page.accepted_currencies[0])
   const [wallet, setWallet] = useState(currencies.find(currency => currency.name.toLowerCase() === intent.page.accepted_currencies[0])?.wallets[0])
   const [price, setPrice] = useState(0)
@@ -149,8 +130,8 @@ const Intent = ({ intent }: Props) => {
     return true
   }
 
-  const qrCode = async () => {
-    if (!email || !checkIfAllFilled()) {
+  const seeQrCode = async () => {
+    if (!email) {
       toast.error('Fill all Fields')
       return
     }
@@ -160,231 +141,15 @@ const Intent = ({ intent }: Props) => {
       return
     }
     if (option.toLowerCase() === 'solana') {
-      const connection = new Connection(clusterApiUrl('devnet'))
-
-      console.log('2.  a customer checkout \n')
-      console.log(intent.page.sol_address)
-      const recipient = new PublicKey(intent.page.sol_address)
-      console.log(price.toFixed(2))
-      const amount = new BigNumber(price.toFixed(2))
-      console.log(amount)
-      const reference = new Keypair().publicKey
-      const label = 'Jungle Cats store'
-      const message = 'Jungle Cats store - your order - #001234'
-      const memo = 'JC#4098'
-
-      const url = encodeURL({
-        recipient,
-        amount,
-        reference,
-        label,
-        message,
-        memo,
-      })
-
-      // const qrCode = createQR(url);
-      // console.log(qrCode)
-      console.log(url)
-      // setURL(url)
-      // setQrCode(qrCode._qr?.createDataURL())
-      // setIsModalOpen(true)
-
-      console.log('\n5. Find the transaction')
-      let signatureInfo
-
-      const { signature } = await new Promise((resolve, reject) => {
-        /**
-         * Retry until we find the transaction
-         *
-         * If a transaction with the given reference can't be found, the `findTransactionSignature`
-         * function will throw an error. There are a few reasons why this could be a false negative:
-         *
-         * - Transaction is not yet confirmed
-         * - Customer is yet to approve/complete the transaction
-         *
-         * You can implement a polling strategy to query for the transaction periodically.
-         */
-        var a = false
-        const interval = setInterval(async () => {
-          console.count('Checking for transaction...')
-          try {
-            signatureInfo = await findTransactionSignature(
-              connection,
-              reference,
-              undefined,
-              'confirmed'
-            )
-            console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
-            if(!a) {
-              a = true;
-              var txId = await createTransaction(email, intent.page.fields, '', '', 'solana', signatureInfo.signature.toString(), intent.page.id, [], intent.value)
-              updateIntent({
-                id: intent.id,
-                is_paid: true,
-                transaction_hash: signatureInfo.signature.toString(),
-                from_email: email
-              })
-              toast.success('Payment Successful')
-              // setIsModalOpen(false)
-            }
-            clearInterval(interval)
-            resolve(signatureInfo)
-          } catch (error: any) {
-            if (!(error instanceof FindTransactionSignatureError)) {
-              console.error(error)
-              clearInterval(interval)
-              reject(error)
-            }
-          }
-        }, 250)
-      })
-
-      // Update payment status
-      var paymentStatus = 'confirmed'
-
-      /**
-       * Validate transaction
-       *
-       * Once the `findTransactionSignature` function returns a signature,
-       * it confirms that a transaction with reference to this order has been recorded on-chain.
-       *
-       * `validateTransactionSignature` allows you to validate that the transaction signature
-       * found matches the transaction that you expected.
-       */
-      console.log('\n6. 🔗 Validate transaction \n')
-
-      try {
-        await validateTransactionSignature(
-          connection,
-          signature,
-          recipient,
-          amount,
-          undefined,
-          reference
-        )
-
-        // Update payment status
-        paymentStatus = 'validated'
-        // @ts-ignore
-        // await updateTransaction(txId, true, signatureInfo?.signature)
-      } catch (error) {
-        console.error('❌ Payment failed', error)
-      }
-    } else if (option.toLowerCase() === 'usdc (ethereum)') {
-    } else if (option.toLowerCase() === 'usdc (solana)') {
-      const connection = new Connection(clusterApiUrl('devnet'))
-      const splToken = new PublicKey(
-        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-      )
-      console.log('3. 💰 Create a payment request link \n')
-      const recipient = new PublicKey(intent.page.sol_address)
-      const amount = new BigNumber(1)
-      const reference = new Keypair().publicKey
-      const label = 'Jungle Cats store'
-      const message = 'Jungle Cats store - your order - #001234'
-      const memo = 'JC#4098'
-      const url = encodeURL({
-        recipient,
-        amount,
-        splToken,
-        reference,
-        label,
-        message,
-        memo,
-      })
-      const qrCode = createQR(url)
-      console.log(qrCode)
-      // setQrCode(qrCode._qr?.createDataURL())
-
-      
-
-      console.log('\n5. Find the transaction')
-      let signatureInfo
-
-      const { signature } = await new Promise((resolve, reject) => {
-        /**
-         * Retry until we find the transaction
-         *
-         * If a transaction with the given reference can't be found, the `findTransactionSignature`
-         * function will throw an error. There are a few reasons why this could be a false negative:
-         *
-         * - Transaction is not yet confirmed
-         * - Customer is yet to approve/complete the transaction
-         *
-         * You can implement a polling strategy to query for the transaction periodically.
-         */
-        var a = false
-        const interval = setInterval(async () => {
-          console.count('Checking for transaction...')
-          try {
-            signatureInfo = await findTransactionSignature(
-              connection,
-              reference,
-              undefined,
-              'confirmed'
-            )
-            console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
-            if(!a) {
-              a = true; 
-              var txId = await createTransaction(email, intent.page.fields, '', '', 'SOL', signatureInfo.signature.toString(), intent.page.id, [], intent.value)
-              updateIntent({
-                id: intent.id,
-                is_paid: true,
-                transaction_hash: signatureInfo.signature.toString(),
-                from_email: email
-              })
-              toast.success('Payment Successful')
-              // setIsModalOpen(false)
-            }
-            clearInterval(interval)
-            resolve(signatureInfo)
-          } catch (error: any) {
-            if (!(error instanceof FindTransactionSignatureError)) {
-              console.error(error)
-              clearInterval(interval)
-              reject(error)
-            }
-          }
-        }, 250)
-      })
-
-      // Update payment status
-      var paymentStatus = 'confirmed'
-
-      /**
-       * Validate transaction
-       *
-       * Once the `findTransactionSignature` function returns a signature,
-       * it confirms that a transaction with reference to this order has been recorded on-chain.
-       *
-       * `validateTransactionSignature` allows you to validate that the transaction signature
-       * found matches the transaction that you expected.
-       */
-      console.log('\n6. 🔗 Validate transaction \n')
-
-      try {
-        await validateTransactionSignature(
-          connection,
-          signature,
-          recipient,
-          amount,
-          undefined,
-          reference
-        )
-
-        // Update payment status
-        paymentStatus = 'validated'
-         // @ts-ignore
-        // await updateTransaction(txId, true, signatureInfo?.signature)
-      } catch (error) {
-        console.error('❌ Payment failed', error)
-      }
+      qrCodeSOL(intent, price, email, config['solana']['solana'], setUrl, setQrCode, setIsModalOpen)
+    } else if (option.toLowerCase() === 'usdcsol') {
+      qrCodeSPL(intent, price, email, config['solana']['usdcsol'], setUrl, setQrCode, setIsModalOpen)
     }
   }
 
   const pay = async () => {
     // e.preventDefault()
-    if (!email || !checkIfAllFilled()) {
+    if (!email) {
       toast.error('Fill all Fields')
       return
     }
@@ -395,235 +160,14 @@ const Intent = ({ intent }: Props) => {
     }
 
     if (option.toLowerCase() === 'solana') {
-      console.log('soolsoll')
-      var toastIdTransact
-      try {
-        const toastIdConnect = toast.loading('Connecting Solana Wallet')
-        try {
-          await connectSOL()
-        } catch (e) {
-          toast.dismiss(toastIdConnect)
-          toast.error('Solana Wallet Not Connected')
-          return
-        }
-        const solProvider = window.solana
-        const solConnection = new Connection(clusterApiUrl('devnet'))
-        toast.dismiss(toastIdConnect)
-        toast.success('Successfully Connected Phantom')
-
-        toastIdTransact = toast.loading('Creating Solana Transaction')
-        var transaction = new Transaction().add(
-          SystemProgram.transfer({
-            fromPubkey: solProvider.publicKey,
-            toPubkey: new PublicKey(intent.page.sol_address),
-            lamports: price * LAMPORTS_PER_SOL,
-          })
-        )
-
-        transaction.feePayer = await solProvider.publicKey
-        let blockhashObj = await solConnection.getRecentBlockhash()
-        transaction.recentBlockhash = await blockhashObj.blockhash
-
-        if (transaction) {
-          console.log('Txn created successfully')
-        }
-
-        let signed = await solProvider.signTransaction(transaction)
-
-        let signature = await solConnection.sendRawTransaction(
-          signed.serialize()
-        )
-        await solConnection.confirmTransaction(signature)
-        console.log(intent.value, "totalPrice")
-        var txId = await createTransaction(
-          email,
-          intent.page.fields,
-          '',
-          solProvider.publicKey.toString(),
-          'solana',
-          signature,
-          intent.page.id, 
-          [],
-          intent.value
-        )
-        updateIntent({
-          id: intent.id,
-          is_paid: true,
-          transaction_hash: signature,
-          from_email: email
-        })
-        toast.dismiss(toastIdTransact)
-        toast.success('Successfully Sent Transaction')
-
-        return signature
-      } catch (e) {
-        console.log(e)
-        toast.dismiss(toastIdTransact)
-        toast.error('Transaction not successful')
-      }
+      paySOL(intent, price, email, config['solana']['solana'])
     } else if (option.toLowerCase() === 'ethereum') {
-      var toastTransact, toastConnect
-
-      toastConnect = toast.loading('Connecting Ethereum Wallet')
-      try {
-        var pr = await connectETH()
-        console.log(pr)
-      } catch (e) {
-        toast.dismiss(toastConnect)
-        toast.error("Can't connect to Wallet")
-        return
-      }
-      const ethProvider = new ethers.providers.Web3Provider(pr)
-      const signer = ethProvider.getSigner()
-      const address = await signer.getAddress()
-      setETH(address)
-      toast.dismiss(toastConnect)
-      toast.success('Successfully Connected to ' + wallet)
-
-      toastTransact = toast.loading('Creating Ethereum Transaction')
-
-      try {
-        console.log(intent.page)
-        const tx = await signer.sendTransaction({
-          to: intent.page.eth_address,
-          value: ethers.utils.parseEther(price.toFixed(5)),
-        })
-
-        var txId = await createTransaction(email, intent.page.fields, address, '', 'ethereum', tx.hash, intent.page.id, [], intent.value)
-        updateIntent({
-          id: intent.id,
-          is_paid: true,
-          transaction_hash: tx.hash,
-          from_email: email
-        })
-        toast.dismiss(toastTransact)
-        toast.success('Successfully sent Transaction')
-        return tx
-      } catch (e) {
-        toast.dismiss(toastTransact)
-        toast.error('Transaction not successful')
-        console.log("WagPay: Can't send transaction!", e)
-      }
-    } else if (option.toLowerCase() === 'usdc (ethereum)') {
-      var toastTransact, toastConnect
-      try {
-        toastConnect = toast.loading('Connecting Ethereum Wallet')
-        try {
-          var pr = await connectETH()
-          console.log(pr)
-        } catch (e) {
-          toast.dismiss(toastConnect)
-          toast.error("Can't connect to Wallet")
-          return
-        }
-        const ethProvider = new ethers.providers.Web3Provider(pr)
-        const signer = ethProvider.getSigner()
-        const address = await signer.getAddress()
-        setETH(address)
-        toast.dismiss(toastConnect)
-        toast.success('Successfully Connected to ' + wallet)
-
-        toastTransact = toast.loading('Creating Ethereum Transaction')
-
-        let erc20abi = [
-          'function transfer(address to, uint amount) returns (bool)',
-        ]
-        let erc20contract = new ethers.Contract(
-          '0xF61Cffd6071a8DB7cD5E8DF1D3A5450D9903cF1c',
-          erc20abi,
-          signer
-        )
-        let tx = await erc20contract.transfer(
-          intent.page.eth_address,
-          ethers.utils.parseUnits(price.toString(), 6)
-        )
-
-        toast.dismiss(toastTransact)
-        toast.success('Created Transaction')
-
-        toastTransact = toast.loading('Waiting for Ethereum Transaction')
-        await tx.wait()
-        toast.dismiss(toastTransact)
-        toast.success('Transaction Succesful')
-        var txId = await createTransaction(email, intent.page.fields, address, '', 'usdceth', tx.hash, intent.page.id, [], intent.value)
-        updateIntent({
-          id: intent.id,
-          is_paid: true,
-          transaction_hash: tx.hash,
-          from_email: email
-        })
-        console.log(tx)
-      } catch (e) {
-        toast.dismiss(toastTransact)
-        toast.error("Can't Transact")
-      }
-    } else if (option.toLowerCase() == 'usdc (solana)') {
-      const toastIdConnect = toast.loading('Connecting Solana Wallet')
-      try {
-        await connectSOL()
-      } catch (e) {
-        toast.dismiss(toastIdConnect)
-        toast.error('Solana Wallet Not Connected')
-        return
-      }
-      const solProvider = window.solana
-      const solConnection = new Connection(clusterApiUrl('devnet'))
-      toast.dismiss(toastIdConnect)
-      toast.success('Successfully Connected Phantom')
-
-      toastIdTransact = toast.loading('Creating Solana Transaction')
-
-      const tokenAccount = await getAssociatedTokenAddress(
-        new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
-        solProvider.publicKey
-      )
-
-      const tokenAccountInfo = await getAccount(solConnection, tokenAccount)
-      console.log(intent.page.sol_address)
-
-      const merchantTokenAccount = await getAssociatedTokenAddress(
-        new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
-        new PublicKey(intent.page.sol_address) 
-      )
-
-      const merchantTokenAccountInfo = await getAccount(
-        solConnection,
-        merchantTokenAccount
-      )
-
-      console.log(tokenAccountInfo)
-
-      const instructions: TransactionInstruction = createTransferInstruction(
-        tokenAccountInfo.address,
-        merchantTokenAccountInfo.address,
-        solProvider.publicKey,
-        1,
-        [],
-        TOKEN_PROGRAM_ID
-      )
-
-      const transaction = new Transaction().add(instructions)
-      transaction.feePayer = solProvider.publicKey
-      transaction.recentBlockhash = (
-        await solConnection.getRecentBlockhash()
-      ).blockhash
-      let signed = await solProvider.signTransaction(transaction)
-
-      const transactionSignature = await solConnection.sendRawTransaction(
-        signed.serialize()
-      )
-
-      await solConnection.confirmTransaction(transactionSignature)
-      
-      const tx = await createTransaction(email, intent.page.fields, '', solProvider.publicKey, 'usdcsol', transactionSignature, intent.page.id, [], intent.value)
-      updateIntent({
-        id: intent.id,
-        is_paid: true,
-        transaction_hash: transactionSignature,
-        from_email: email
-      })
-
-      toast.dismiss(toastIdTransact)
+      console.log(config['ethereum'], config)
+      payETH(intent, price, email, config['ethereum']['ethereum'])
+    } else if (option.toLowerCase() === 'usdceth') {
+      payERC20(intent, price, email, config['ethereum']['usdceth'])
+    } else if (option.toLowerCase() == 'usdcsol') {
+      paySPL(intent, price, email, config['solana']['usdcsol'])
     }
   }
 
@@ -691,17 +235,8 @@ const Intent = ({ intent }: Props) => {
             placeholder="sk1122@wagpay.xyz" 
             type="email" 
             name="email" 
-            className="border border-white/20 p-2 w-full text-white bg-transparent" />
-					{intent.page.fields.map((value: any, idx: number) => (
-						<input
-              value={fieldValues[idx].value}
-              onChange={(e) => changeField(idx, e.target.value)}
-							placeholder={value.name}
-							type={value.type}
-							className="p-2 w-full text-white bg-transparent border border-white/20"
-							required
-						/>
-					))}
+            className="border border-white/20 p-2 w-full text-white bg-transparent" 
+          />
 				</div>
 
 				<div className="w-full px-5 flex justify-between items-center">
@@ -714,7 +249,7 @@ const Intent = ({ intent }: Props) => {
 						}
 					>
 						{currencies.map(currency => {
-							if(!intent.page.accepted_currencies.includes(currency.symbol)) return <div></div>
+							if(!intent.currency.includes(currency.symbol)) return <div></div>
 							return <option value={currency.symbol}>{currency.name}</option>	
 						})}
 					</select>
@@ -727,6 +262,31 @@ const Intent = ({ intent }: Props) => {
                       : 'USDC'}</h2>
 					</div>
 				</div>
+
+        {(option.toLowerCase() === 'solana' || option.toLowerCase() === 'usdcsol') && (
+          <div
+            onClick={() => seeQrCode()}
+            className="cursor-pointer rounded-md bg-black px-3 py-2 text-white"
+          >
+            <svg width="60" height="22" viewBox="0 0 60 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M53.7996 15.3534L50.3357 7.78491H47.4607L52.4091 17.997L52.32 18.3045C52.1961 18.7132 51.9345 19.0662 51.5798 19.3032C51.2252 19.5402 50.7995 19.6465 50.3753 19.6039C49.8788 19.5993 49.3917 19.4679 48.9601 19.222L48.4999 21.4093C49.164 21.6836 49.8747 21.8267 50.5931 21.8308C52.5724 21.8308 53.7699 21.1017 54.7596 18.9542L60 7.78491H57.2239L53.7996 15.3534Z" fill="white"/>
+              <path d="M29.3187 4.1792H21.0153V18.0912H23.7369V12.9777H29.3187C32.3521 12.9777 34.3463 11.4452 34.3463 8.57847C34.3463 5.71175 32.3521 4.1792 29.3187 4.1792ZM29.1702 10.5425H23.727V6.57474H29.1702C30.7438 6.57474 31.6445 7.2939 31.6445 8.55863C31.6445 9.82336 30.7438 10.5425 29.1702 10.5425Z" fill="white"/>
+              <path d="M45.7249 15.4526V11.2617C45.7249 8.78182 43.9484 7.49725 40.9002 7.49725C38.426 7.49725 36.2586 8.65287 35.6499 10.4284L37.8866 11.222C38.2182 10.3342 39.3711 9.67953 40.8062 9.67953C42.5084 9.67953 43.226 10.3739 43.226 11.222V11.4948L39.1782 11.9412C36.8475 12.1891 35.3134 13.2356 35.3134 15.1055C35.3134 17.1538 37.0701 18.2549 39.4008 18.2549C40.9031 18.3018 42.3661 17.7692 43.4882 16.767C43.894 17.7589 44.3097 18.4235 47.0758 18.0714V15.9982C45.9674 16.266 45.7249 15.9982 45.7249 15.4526ZM43.2507 14.1234C43.2507 15.4725 41.3654 16.1867 39.7868 16.1867C38.5843 16.1867 37.8619 15.7998 37.8619 15.0311C37.8619 14.2623 38.4557 13.9846 39.6037 13.8506L43.2606 13.4241L43.2507 14.1234Z" fill="white"/>
+              <path d="M15.8678 14.8277C15.8871 14.8856 15.8871 14.9483 15.8678 15.0062C15.8566 15.064 15.8292 15.1174 15.7886 15.16L13.1709 17.9126C13.1132 17.9721 13.0442 18.0193 12.968 18.0515C12.8916 18.0851 12.809 18.102 12.7256 18.1011H0.309983C0.252484 18.1016 0.195969 18.0862 0.146685 18.0565C0.0974336 18.0229 0.0581183 17.9766 0.0328714 17.9226C0.015435 17.8677 0.015435 17.8088 0.0328714 17.7539C0.0431328 17.6968 0.0688042 17.6437 0.107097 17.6002L2.72976 14.8475C2.78744 14.7881 2.85643 14.7409 2.93264 14.7087C3.00891 14.6747 3.09166 14.6577 3.17512 14.6591H15.5709C15.6307 14.6579 15.6895 14.6752 15.7391 14.7087C15.7948 14.7317 15.8405 14.7739 15.8678 14.8277ZM13.1759 9.60015C13.1169 9.54228 13.0482 9.49527 12.973 9.46128C12.8958 9.43008 12.8137 9.41328 12.7305 9.41168H0.309983C0.251765 9.41254 0.194951 9.42972 0.145975 9.46127C0.0969987 9.49283 0.057818 9.5375 0.0328714 9.59023C0.0157557 9.64513 0.0157557 9.70396 0.0328714 9.75886C0.0412052 9.81656 0.0671307 9.87026 0.107097 9.91261L2.72976 12.6702C2.78873 12.7281 2.8574 12.7751 2.93264 12.8091C3.00965 12.8407 3.0919 12.8575 3.17512 12.8587H15.5709C15.6307 12.8598 15.6895 12.8425 15.7391 12.8091C15.7891 12.7799 15.8275 12.7344 15.848 12.6801C15.8734 12.6274 15.8818 12.568 15.872 12.5103C15.8623 12.4525 15.8349 12.3992 15.7936 12.3578L13.1759 9.60015ZM0.146685 7.56667C0.195969 7.59636 0.252484 7.6118 0.309983 7.6113H12.7305C12.8139 7.61217 12.8966 7.59527 12.973 7.56171C13.0492 7.52948 13.1182 7.48226 13.1759 7.42284L15.7936 4.67019C15.8341 4.6276 15.8616 4.57423 15.8728 4.51644C15.8899 4.46154 15.8899 4.40271 15.8728 4.34781C15.8523 4.29359 15.8139 4.24807 15.7639 4.21886C15.7142 4.18544 15.6555 4.16812 15.5956 4.16926H3.15532C3.07186 4.16793 2.98912 4.18485 2.91285 4.21886C2.83664 4.25109 2.76765 4.29831 2.70997 4.35773L0.0922528 7.12029C0.0507444 7.16218 0.0231013 7.21586 0.0130773 7.27404C-0.00435908 7.3289 -0.00435908 7.38782 0.0130773 7.44267C0.0451946 7.49569 0.0914761 7.53864 0.146685 7.56667Z" fill="url(#paint0_linear_306_215)"/>
+              <defs>
+              <linearGradient id="paint0_linear_306_215" x1="1.34093" y1="18.4332" x2="14.0922" y2="3.77438" gradientUnits="userSpaceOnUse">
+              <stop offset="0.08" stop-color="#9945FF"/>
+              <stop offset="0.3" stop-color="#8752F3"/>
+              <stop offset="0.5" stop-color="#5497D5"/>
+              <stop offset="0.6" stop-color="#43B4CA"/>
+              <stop offset="0.72" stop-color="#28E0B9"/>
+              <stop offset="0.97" stop-color="#19FB9B"/>
+              </linearGradient>
+              </defs>
+            </svg>
+
+          </div>
+        )}
 
 				<div className="w-full p-5">
 					<button onClick={() => pay()} className="w-full rounded-xl text-xl font-bold tracking-wider p-5 bg-gradient-to-r from-[#3C43EE] to-[#5055DA]">
