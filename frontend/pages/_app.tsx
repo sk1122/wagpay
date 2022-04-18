@@ -42,6 +42,9 @@ import QRCodeStyling, {
   CornerDotType,
   Options,
 } from 'qr-code-styling'
+import Router from 'next/router';
+import NProgress from 'nprogress'; //nprogress module
+import 'nprogress/nprogress.css'; //styles of nprogress
 
 const infuraId = 'a618bb907c2f4670a721be9cd51f388e'
 
@@ -78,6 +81,11 @@ declare global {
     solana: any
   }
 }
+
+Router.events.on('routeChangeStart', () => NProgress.start()); 
+Router.events.on('routeChangeComplete', () => NProgress.done()); 
+Router.events.on('routeChangeError', () => NProgress.done());
+
 
 function MyApp({ Component, pageProps }: AppProps) {
   const network = WalletAdapterNetwork.Devnet
