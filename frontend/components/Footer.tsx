@@ -146,7 +146,7 @@ const Footer = (props: Props) => {
         </div>
         <div className="mt-12 border-t border-gray-200 py-8">
           <p className="text-base text-gray-400 xl:text-center">
-            &copy; 2022 Wagpay, All rights reserved.
+            &copy; 2022 Wagpay, All rights reserved. Made By Satyam, Mandar and team
           </p>
         </div>
       </div>
