@@ -4,7 +4,7 @@ import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, System
 import WalletConnectProvider from "@walletconnect/web3-provider"
 import { ethers } from "ethers"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Authereum from 'authereum'
 import Web3Modal from 'web3modal'
 import toast from "react-hot-toast"
@@ -22,7 +22,7 @@ import useSolana from "../../../hooks/useSolana"
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
-type supported_currencies = 'ethereum' | 'solana' | 'usdceth' | 'usdcsol'
+type supported_currencies = 'ethereum' | 'solana' | 'usdceth' | 'usdcsol' | 'matic' | 'usdcmatic'
 
 const currencies = [
 	{
@@ -44,7 +44,12 @@ const currencies = [
 		symbol: 'usdcsol',
 		name: 'USDC (Solana)',
 		wallets: ['Phantom']
-	}
+	},
+  {
+    symbol: 'matic',
+    name: 'MATIC',
+    wallets: ['Metamask', 'WalletConnect', 'Coinbase Wallet']
+  }
 ]
 
 const updateIntent = async (intent_data: object) => {
@@ -115,7 +120,7 @@ const Intent = ({ intent }: Props) => {
 
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
-  const [option, setOption] = useState<supported_currencies>(intent.page.accepted_currencies[0])
+  const [option, setOption] = useState<supported_currencies>(intent.currency[0])
   const [wallet, setWallet] = useState(currencies.find(currency => currency.name.toLowerCase() === intent.page.accepted_currencies[0])?.wallets[0])
   const [price, setPrice] = useState(0)
   const [fieldValues, setFieldValues] = useState<any[]>(intent.page.fields)
@@ -141,9 +146,9 @@ const Intent = ({ intent }: Props) => {
       return
     }
     if (option.toLowerCase() === 'solana') {
-      qrCodeSOL(intent, price, email, config['solana']['solana'], setUrl, setQrCode, setIsModalOpen)
+      qrCodeSOL(intent, price, email, config.currencies['solana']['solana'], setUrl, setQrCode, setIsModalOpen)
     } else if (option.toLowerCase() === 'usdcsol') {
-      qrCodeSPL(intent, price, email, config['solana']['usdcsol'], setUrl, setQrCode, setIsModalOpen)
+      qrCodeSPL(intent, price, email, config.currencies['solana']['usdcsol'], setUrl, setQrCode, setIsModalOpen)
     }
   }
 
@@ -160,14 +165,15 @@ const Intent = ({ intent }: Props) => {
     }
 
     if (option.toLowerCase() === 'solana') {
-      paySOL(intent, price, email, config['solana']['solana'])
+      paySOL(intent, price, email, config.currencies['solana']['solana'])
     } else if (option.toLowerCase() === 'ethereum') {
-      console.log(config['ethereum'], config)
-      payETH(intent, price, email, config['ethereum']['ethereum'])
+      payETH(intent, price, email, config.currencies['ethereum']['ethereum'])
     } else if (option.toLowerCase() === 'usdceth') {
-      payERC20(intent, price, email, config['ethereum']['usdceth'])
+      payERC20(intent, price, email, config.currencies['ethereum']['usdceth'])
     } else if (option.toLowerCase() == 'usdcsol') {
-      paySPL(intent, price, email, config['solana']['usdcsol'])
+      paySPL(intent, price, email, config.currencies['solana']['usdcsol'])
+    } else if (option.toLowerCase() === 'matic') {
+      payETH(intent, price, email, config.currencies['matic']['matic'])
     }
   }
 
@@ -223,9 +229,19 @@ const Intent = ({ intent }: Props) => {
     console.log(fieldValues, 'fieldValues')
   }, [fieldValues])
 
+  const divRef = useRef<any>()
+
+  useEffect(() => {
+    setInterval(() => {
+      divRef.current.style.borderTopWidth += 5
+    }, 200)
+  }, [])
+
+  useEffect(() => console.log(option), [option])
+  
 	return (
 		<div className='w-full min-h-screen flex justify-center items-center bg-[#09101A] font-inter'>
-			<div className="w-1/3 h-full flex justify-center items-center flex-col bg-[#141C28] border-2 border-white/20 p-10 text-white rounded-xl">
+			<div ref={divRef} className="w-1/3 h-full flex justify-center items-center flex-col bg-[#141C28] border-2 border-white/20 p-10 text-white rounded-xl relative wagpay">
 				<h1 className="font-jakarta text-4xl">WagPay</h1>
 				<div className="w-full p-5 space-y-4">
 					<input 
@@ -241,16 +257,18 @@ const Intent = ({ intent }: Props) => {
 
 				<div className="w-full px-5 flex justify-between items-center">
 					<select
-						className="relative block w-1/2 rounded-md border-gray-300 bg-transparent focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+						className="relativ block w-1/2 rounded-md border-gray-300 bg-transparent focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 						aria-label="Default select example"
 						value={option}
 						onChange={(e) =>
 							setOption(e.target.value as supported_currencies)
 						}
 					>
-						{currencies.map(currency => {
-							if(!intent.currency.includes(currency.symbol)) return <div></div>
-							return <option value={currency.symbol}>{currency.name}</option>	
+						{Object.keys(config?.currencies).map((currency_data: any) => {
+              return Object.keys(config.currencies[currency_data]).map((currency: any) => {
+                if(!intent.currency.includes(config.currencies[currency_data][currency].name)) return <div></div>
+                return <option className="text-black" value={config.currencies[currency_data][currency].name}>{config.currencies[currency_data][currency].symbol}</option>	
+              })
 						})}
 					</select>
 					<div>

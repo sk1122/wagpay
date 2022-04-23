@@ -42,17 +42,19 @@ const usdcmatic: Config = {
 const BACKEND_URL = 'https://wagpay.club'
 
 export default {
-	ethereum: {
-		ethereum,
-		usdceth
-	},
-	solana: {
-		solana,
-		usdcsol
-	},
-	matic: {
-		matic,
-		usdcmatic
+	currencies: {
+		ethereum: {
+			ethereum,
+			usdceth
+		},
+		solana: {
+			solana,
+			usdcsol
+		},
+		matic: {
+			matic,
+			usdcmatic
+		},
 	},
 	BACKEND_URL
 }

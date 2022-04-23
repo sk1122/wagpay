@@ -103,7 +103,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     [network]
   )
 
-  const [config, setConfig] = useState<any>()
+  const [config, setConfig] = useState<any>(mainnet)
 
   useEffect(() => {
     const { NEXT_PUBLIC_ENV } = process.env
