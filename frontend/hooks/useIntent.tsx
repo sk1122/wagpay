@@ -2,7 +2,7 @@ import toast from "react-hot-toast"
 
 const useIntent = () => {
 	const updateIntent = async (intent_data: object) => {
-		const data = await fetch(`https://wagpay.club/api/paymentIntents/`, {
+		const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/paymentIntents/`, {
 			method: 'PATCH',
 			body: JSON.stringify(intent_data),
 			headers: {

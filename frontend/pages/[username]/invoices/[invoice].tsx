@@ -47,7 +47,7 @@ interface Props {
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
-      `https://wagpay.club/api/invoices/${context.params.invoice}`
+      `${process.env.NEXT_BACKEND_URL}/api/invoices/${context.params.invoice}`
     )
     const invoice: Invoice = await res.json()
     console.log(invoice)

@@ -34,7 +34,7 @@ interface Props {
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
-      `https://wagpay.club/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
+      `${process.env.NEXT_BACKEND_URL}/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
     )
     const store: Page = await res.json()
     return {
@@ -63,7 +63,7 @@ const Store = ({ store }: Props) => {
   const updateVisit = async () => {
     console.log(store.id)
     let data = await fetch(
-      `https://wagpay.club/api/pages`,
+      `${process.env.NEXT_BACKEND_URL}/api/pages`,
       {
         method: 'PATCH',
         body: JSON.stringify({

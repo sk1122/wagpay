@@ -9,7 +9,7 @@ const Auth: React.FC = () => {
 	const { push } = useRouter()
 
 	const getOrCreateUser = async (email: string) => {
-		const data = await fetch(`https://wagpay.club/api/user/email/${email}`)
+		const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/user/email/${email}`)
 		const user = await data.json()
 		console.log(user, "USER")
 		if(data.status == 400) {

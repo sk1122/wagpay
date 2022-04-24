@@ -39,7 +39,7 @@ const usdcmatic: Config = {
 	tokenAddress: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
 }
 
-const BACKEND_URL = 'https://wagpay.club'
+const BACKEND_URL = '${process.env.NEXT_BACKEND_URL}'
 
 export default {
 	currencies: {
