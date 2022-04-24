@@ -89,7 +89,7 @@ Router.events.on('routeChangeError', () => NProgress.done());
 
 
 function MyApp({ Component, pageProps }: AppProps) {
-  ReactGA.initialize('G-4E4MWRHF8L');
+  ReactGA.initialize('UA-226967881-1');
   ReactGA.pageview(window.location.pathname + window.location.search);
   
   const network = WalletAdapterNetwork.Devnet
