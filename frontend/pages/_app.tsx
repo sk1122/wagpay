@@ -89,8 +89,10 @@ Router.events.on('routeChangeError', () => NProgress.done());
 
 
 function MyApp({ Component, pageProps }: AppProps) {
-  ReactGA.initialize('UA-226967881-1');
-  ReactGA.pageview(window.location.pathname + window.location.search);
+  useEffect(() => {
+    ReactGA.initialize('UA-226967881-1');
+    ReactGA.pageview(window.location.pathname + window.location.search);
+  }, [])
   
   const network = WalletAdapterNetwork.Devnet
   const endpoint = useMemo(() => clusterApiUrl(network), [network])
