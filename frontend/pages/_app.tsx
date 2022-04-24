@@ -45,6 +45,7 @@ import QRCodeStyling, {
 import Router from 'next/router';
 import NProgress from 'nprogress'; //nprogress module
 import 'nprogress/nprogress.css'; //styles of nprogress
+import ReactGA from 'react-ga';
 
 const infuraId = 'a618bb907c2f4670a721be9cd51f388e'
 
@@ -88,6 +89,9 @@ Router.events.on('routeChangeError', () => NProgress.done());
 
 
 function MyApp({ Component, pageProps }: AppProps) {
+  ReactGA.initialize('G-4E4MWRHF8L');
+  ReactGA.pageview(window.location.pathname + window.location.search);
+  
   const network = WalletAdapterNetwork.Devnet
   const endpoint = useMemo(() => clusterApiUrl(network), [network])
   const wallets = useMemo(
