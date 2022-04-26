@@ -74,7 +74,7 @@ export const getServerSideProps = async (context: any) => {
 	const res = await data.json()
 
   
-  if(new Date().getMinutes() - new Date(res.created_at).getMinutes() <= 10 && new Date().getHours() - new Date(res.created_at).getHours()) {
+  if(res.created_at !== 0 && new Date().getMinutes() - new Date(res.created_at).getMinutes() <= 10 && new Date().getHours() - new Date(res.created_at).getHours()) {
     toast.error('Already invalid')
     return {
       props: {
