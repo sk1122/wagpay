@@ -7,6 +7,7 @@ import toast from "react-hot-toast"
 import useTransactions from "./useTransactions"
 import useIntent from "./useIntent"
 import { Config } from "config.type"
+import { Transaction } from "transaction.type"
 
 const useEthereum = () => {
 	const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
@@ -46,7 +47,7 @@ const useEthereum = () => {
 		}
 	}
 
-	const payETH = async (intent: any, price: number, email: string, currency: Config) => {
+	const payETH = async (transaction: Transaction, price: number, email: string, currency: Config) => {
 		var toastTransact, toastConnect
 
 		toastConnect = toast.loading('Connecting Ethereum Wallet')
@@ -69,17 +70,19 @@ const useEthereum = () => {
 
 		try {
 			const tx = await signer.current.sendTransaction({
-				to: intent.page.eth_address,
+				to: transaction.to as string,
 				value: ethers.utils.parseEther(price.toFixed(5)),
 				chainId: currency.chainId as number
 			})
 
-			var txId = await createTransaction(email, intent.page.fields, address.current, '', currency.name, tx.hash, intent.page.id, [], intent.value)
+			var txId = await createTransaction(email, transaction.fields, address.current, '', currency.name, tx.hash, 0, [], transaction.price)
 			updateIntent({
-				id: intent.id,
+				id: transaction.id,
 				is_paid: true,
 				transaction_hash: tx.hash,
-				from_email: email
+				from_data: {
+					email: email
+				}
 			})
 			toast.dismiss(toastTransact)
 			toast.success('Successfully sent Transaction')
@@ -91,7 +94,7 @@ const useEthereum = () => {
 		}
 	}
 
-	const payERC20 = async (intent: any, price: number, email: string, currency: Config) => {
+	const payERC20 = async (transaction: Transaction, price: number, email: string, currency: Config) => {
 		if(!currency.tokenAddress) {
 			toast.error('Not selected a currency')
 			return
@@ -121,7 +124,7 @@ const useEthereum = () => {
 				signer.current
 			)
 			let tx = await erc20contract.transfer(
-				intent.page.eth_address,
+				transaction.to as string,
 				ethers.utils.parseUnits(price.toString(), 6)
 			)
 
@@ -132,12 +135,14 @@ const useEthereum = () => {
 			await tx.wait()
 			toast.dismiss(toastTransact)
 			toast.success('Transaction Succesful')
-			var txId = await createTransaction(email, intent.page.fields, address.current, '', currency.name, tx.hash, intent.page.id, [], intent.value)
+			var txId = await createTransaction(email, transaction.fields, address.current, '', currency.name, tx.hash, 0, [], transaction.price)
 			updateIntent({
-				id: intent.id,
+				id: transaction.id,
 				is_paid: true,
 				transaction_hash: tx.hash,
-				from_email: email
+				from_data: {
+					email: email
+				}
 			})
 			console.log(tx)
 		} catch (e) {

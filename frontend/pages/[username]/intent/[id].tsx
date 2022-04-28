@@ -19,6 +19,7 @@ import {
 import useEthereum from "../../../hooks/useEthereum"
 import { useAccountContext } from "../../_context"
 import useSolana from "../../../hooks/useSolana"
+import { Transaction as TInterface } from "transaction.type"
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
@@ -73,8 +74,9 @@ export const getServerSideProps = async (context: any) => {
 
 	const res = await data.json()
 
+  console.log()
   
-  if(res.created_at !== 0 && new Date().getMinutes() - new Date(res.created_at).getMinutes() <= 10 && new Date().getHours() - new Date(res.created_at).getHours()) {
+  if((res.is_paid && res.transaction_hash) || (res.time !== 0 && new Date().getMinutes() - new Date(res.created_at).getMinutes() <= 10 && new Date().getHours() - new Date(res.created_at).getHours())) {
     toast.error('Already invalid')
     return {
       props: {
@@ -147,10 +149,24 @@ const Intent = ({ intent, expired }: Props) => {
       toast.error('Select a Product')
       return
     }
+
+    let transaction: TInterface = {
+      to: intent.sol_address,
+      value: price,
+      price: intent.value,
+      fields: {},
+      id: intent.id
+    }
+
+    let store_data = {
+      title: intent.title,
+      description: intent.description
+    }
+
     if (option.toLowerCase() === 'solana') {
-      qrCodeSOL(intent, price, email, config.currencies['solana']['solana'], setUrl, setQrCode, setIsModalOpen)
+      qrCodeSOL(transaction, store_data, price, email, config.currencies['solana']['solana'], setUrl, setQrCode, setIsModalOpen)
     } else if (option.toLowerCase() === 'usdcsol') {
-      qrCodeSPL(intent, price, email, config.currencies['solana']['usdcsol'], setUrl, setQrCode, setIsModalOpen)
+      qrCodeSPL(transaction, store_data, price, email, config.currencies['solana']['usdcsol'], setUrl, setQrCode, setIsModalOpen)
     }
   }
 
@@ -166,16 +182,34 @@ const Intent = ({ intent, expired }: Props) => {
       return
     }
 
+    let transaction: TInterface = {
+      to: "",
+      value: price,
+      price: intent.value,
+      fields: {},
+      id: intent.id
+    }
+
+    let store_data = {
+      title: intent.title,
+      description: intent.description
+    }
+
     if (option.toLowerCase() === 'solana') {
-      paySOL(intent, price, email, config.currencies['solana']['solana'])
+      transaction.to = intent.sol_address
+      paySOL(transaction, price, email, config.currencies['solana']['solana'])
     } else if (option.toLowerCase() === 'ethereum') {
-      payETH(intent, price, email, config.currencies['ethereum']['ethereum'])
+      transaction.to = intent.eth_address
+      payETH(transaction, price, email, config.currencies['ethereum']['ethereum'])
     } else if (option.toLowerCase() === 'usdceth') {
-      payERC20(intent, price, email, config.currencies['ethereum']['usdceth'])
+      transaction.to = intent.eth_address
+      payERC20(transaction, price, email, config.currencies['ethereum']['usdceth'])
     } else if (option.toLowerCase() == 'usdcsol') {
-      paySPL(intent, price, email, config.currencies['solana']['usdcsol'])
+      transaction.to = intent.sol_address
+      paySPL(transaction, price, email, config.currencies['solana']['usdcsol'])
     } else if (option.toLowerCase() === 'matic') {
-      payETH(intent, price, email, config.currencies['matic']['matic'])
+      transaction.to = intent.eth_address
+      payETH(transaction, price, email, config.currencies['matic']['matic'])
     }
   }
 

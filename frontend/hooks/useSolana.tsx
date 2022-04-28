@@ -13,6 +13,7 @@ import {
 } from '@solana/spl-token'
 import { createQR, encodeURL, findTransactionSignature, FindTransactionSignatureError, validateTransactionSignature } from "@solana/pay"
 import BigNumber from "bignumber.js"
+import { Transaction as TInterface } from "../types/transaction.type"
 
 const useSolana = () => {
 	const address = useRef('')
@@ -28,7 +29,7 @@ const useSolana = () => {
 		}
 	}
 
-	const paySOL = async (intent: any, price: number, email: string, currency: Config) => {
+	const paySOL = async (tx: TInterface, price: number, email: string, currency: Config) => {
 		var toastIdTransact
 		try {
 			const toastIdConnect = toast.loading('Connecting Solana Wallet')
@@ -48,7 +49,7 @@ const useSolana = () => {
 			var transaction = new Transaction().add(
 				SystemProgram.transfer({
 					fromPubkey: solProvider.publicKey,
-					toPubkey: new PublicKey(intent.page.sol_address),
+					toPubkey: new PublicKey(tx.to),
 					lamports: price * LAMPORTS_PER_SOL,
 				})
 			)
@@ -67,26 +68,29 @@ const useSolana = () => {
 				signed.serialize()
 			)
 			await solConnection.confirmTransaction(signature)
-			console.log(intent.value, "totalPrice")
+			
+			toast.dismiss(toastIdTransact)
+			toast.success("Transaction Successful✅")
+
 			var txId = await createTransaction(
 				email,
-				intent.page.fields,
+				tx.fields,
 				'',
 				solProvider.publicKey.toString(),
 				currency.name,
 				signature,
-				intent.page.id, 
+				0, 
 				[],
-				intent.value
+				tx.price
 			)
 			updateIntent({
-				id: intent.id,
+				id: tx.id,
 				is_paid: true,
 				transaction_hash: signature,
-				from_email: email
+				from_data: {
+					email: email
+				}
 			})
-			toast.dismiss(toastIdTransact)
-			toast.success('Successfully Sent Transaction')
 
 			return signature
 		} catch(e) {
@@ -94,7 +98,7 @@ const useSolana = () => {
 		}
 	}
 
-	const paySPL = async (intent: any, price: number, email: string, currency: Config) => {
+	const paySPL = async (tx: TInterface, price: number, email: string, currency: Config) => {
 		if(!currency.tokenAddress) {
 			toast.error('Not selected a currency')
 			return
@@ -128,7 +132,7 @@ const useSolana = () => {
 			tokenAccountInfo = await getAccount(solConnection, tokenAccount)
 			merchantTokenAccount = await getAssociatedTokenAddress(
 			   new PublicKey(currency.tokenAddress),
-			   new PublicKey(intent.page.sol_address) 
+			   new PublicKey(tx.to) 
 		   )
 		   merchantTokenAccountInfo = await getAccount(
 			   solConnection,
@@ -166,119 +170,118 @@ const useSolana = () => {
 		)
 
 		await solConnection.confirmTransaction(transactionSignature)
+
+		toast.dismiss(toastIdTransact)
+		toast.success("Transaction Successful✅")
 		
-		const tx = await createTransaction(email, intent.page.fields, '', solProvider.publicKey, currency.name, transactionSignature, intent.page.id, [], intent.value)
+		const txId = await createTransaction(email, tx.fields, '', solProvider.publicKey, currency.name, transactionSignature, 0, [], tx.price)
 		updateIntent({
-			id: intent.id,
+			id: tx.id,
 			is_paid: true,
 			transaction_hash: transactionSignature,
 			from_email: email
 		})
-
-		toast.dismiss(toastIdTransact)
 	}
 
-	const qrCodeSOL = async (intent: any, price: number, email: string, currency: Config, setURL: Function, setQrCode: Function, setIsModalOpen: Function) => {
+	const qrCodeSOL = async (tx: TInterface, store_data: any, price: number, email: string, currency: Config, setURL: Function, setQrCode: Function, setIsModalOpen: Function) => {
 		const connection = new Connection(clusterApiUrl(currency.chainId as Cluster))
+		const recipient = new PublicKey(tx.to)
+		
+		const amount = new BigNumber(price.toFixed(2))
+		const reference = new Keypair().publicKey
+		const label = store_data.title
+		const message = `${store_data.title} - Payment Intent ${tx.id}`
+		const memo = tx.id
 
-      console.log('2.  a customer checkout \n')
-      console.log(intent.page.sol_address)
-      const recipient = new PublicKey(intent.page.sol_address)
-      console.log(price.toFixed(2))
-      const amount = new BigNumber(price.toFixed(2))
-      console.log(amount)
-      const reference = new Keypair().publicKey
-      const label = intent.page.title
-      const message = `${intent.page.title} - Payment Intent ${intent.id}`
-      const memo = intent.id
+		const url = encodeURL({
+			recipient,
+			amount,
+			reference,
+			label,
+			message,
+			memo,
+		})
 
-      const url = encodeURL({
-        recipient,
-        amount,
-        reference,
-        label,
-        message,
-        memo,
-      })
+		const qrCode = createQR(url);
+		setURL(url)
+		setQrCode(qrCode._qr?.createDataURL())
+		setIsModalOpen(true)
 
-      const qrCode = createQR(url);
-      setURL(url)
-      setQrCode(qrCode._qr?.createDataURL())
-      setIsModalOpen(true)
+		console.log('\n5. Find the transaction')
+		let signatureInfo
 
-      console.log('\n5. Find the transaction')
-      let signatureInfo
+		const { signature } = await new Promise((resolve, reject) => {
+			var a = false
+			const interval = setInterval(async () => {
+			console.count('Checking for transaction...')
+			try {
+				signatureInfo = await findTransactionSignature(
+				connection,
+				reference,
+				undefined,
+				'confirmed'
+				)
+				console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
+				if(!a) {
+				a = true;
+				var txId = await createTransaction(email, tx.fields, '', '', currency.name, signatureInfo.signature.toString(), 0, [], tx.price)
+				updateIntent({
+					id: tx.id,
+					is_paid: true,
+					transaction_hash: signatureInfo.signature.toString(),
+					from_data: {
+						email: email
+					}
+				})
+				toast.success('Payment Successful')
+				setIsModalOpen(false)
+				}
+				clearInterval(interval)
+				resolve(signatureInfo)
+			} catch (error: any) {
+				if (!(error instanceof FindTransactionSignatureError)) {
+				console.error(error)
+				clearInterval(interval)
+				reject(error)
+				}
+			}
+			}, 250)
+		})
 
-      const { signature } = await new Promise((resolve, reject) => {
-        var a = false
-        const interval = setInterval(async () => {
-          console.count('Checking for transaction...')
-          try {
-            signatureInfo = await findTransactionSignature(
-              connection,
-              reference,
-              undefined,
-              'confirmed'
-            )
-            console.log('\n 🖌  Signature found: ', signatureInfo.signature, a)
-            if(!a) {
-              a = true;
-              var txId = await createTransaction(email, intent.page.fields, '', '', currency.name, signatureInfo.signature.toString(), intent.page.id, [], intent.value)
-              updateIntent({
-                id: intent.id,
-                is_paid: true,
-                transaction_hash: signatureInfo.signature.toString(),
-                from_email: email
-              })
-              toast.success('Payment Successful')
-              setIsModalOpen(false)
-            }
-            clearInterval(interval)
-            resolve(signatureInfo)
-          } catch (error: any) {
-            if (!(error instanceof FindTransactionSignatureError)) {
-              console.error(error)
-              clearInterval(interval)
-              reject(error)
-            }
-          }
-        }, 250)
-      })
+		// Update payment status
+		var paymentStatus = 'confirmed'
 
-      // Update payment status
-      var paymentStatus = 'confirmed'
+		/**
+		 * Validate transaction
+		 *
+		 * Once the `findTransactionSignature` function returns a signature,
+		 * it confirms that a transaction with reference to this order has been recorded on-chain.
+		 *
+		 * `validateTransactionSignature` allows you to validate that the transaction signature
+		 * found matches the transaction that you expected.
+		 */
+		console.log('\n6. 🔗 Validate transaction \n')
 
-      /**
-       * Validate transaction
-       *
-       * Once the `findTransactionSignature` function returns a signature,
-       * it confirms that a transaction with reference to this order has been recorded on-chain.
-       *
-       * `validateTransactionSignature` allows you to validate that the transaction signature
-       * found matches the transaction that you expected.
-       */
-      console.log('\n6. 🔗 Validate transaction \n')
+		try {
+			await validateTransactionSignature(
+				connection,
+				signature,
+				recipient,
+				amount,
+				undefined,
+				reference
+			)
 
-      try {
-        await validateTransactionSignature(
-          connection,
-          signature,
-          recipient,
-          amount,
-          undefined,
-          reference
-        )
-
-        // Update payment status
-        paymentStatus = 'validated'
-        // @ts-ignore
-        // await updateTransaction(txId, true, signatureInfo?.signature)
-      } catch (error) {
-        console.error('❌ Payment failed', error)
-      }
+			// Update payment status
+			paymentStatus = 'validated'
+			// @ts-ignore
+			// await updateTransaction(txId, true, signatureInfo?.signature)
+		} catch (error) {
+			console.error('❌ Payment failed', error)
+		}
 	}
 
-	const qrCodeSPL = async (intent: any, price: number, email: string, currency: Config, setURL: Function, setQrCode: Function, setIsModalOpen: Function) => {
+	const qrCodeSPL = async (tx: TInterface, store_data: any, price: number, email: string, currency: Config, setURL: Function, setQrCode: Function, setIsModalOpen: Function) => {
 		if(!currency.tokenAddress) {
 			toast.error('Select a Valid SPL Token')
 			return
@@ -289,12 +292,12 @@ const useSolana = () => {
 			currency.tokenAddress
 		)
 		console.log('3. 💰 Create a payment request link \n')
-		const recipient = new PublicKey(intent.page.sol_address)
-		const amount = new BigNumber(1)
+		const recipient = new PublicKey(tx.to)
+		const amount = new BigNumber(tx.value)
 		const reference = new Keypair().publicKey
-		const label = intent.page.title
-		const message = `${intent.page.title} - your payment - ${intent.id}`
-		const memo = intent.id
+		const label = store_data.title
+		const message = `${store_data.title} - your payment - ${tx.id}`
+		const memo = tx.id
 		const url = encodeURL({
 			recipient,
 			amount,
@@ -331,12 +334,14 @@ const useSolana = () => {
 				)
 				if(!a) {
 					a = true; 
-					var txId = await createTransaction(email, intent.page.fields, '', '', currency.name, signatureInfo.signature.toString(), intent.page.id, [], intent.value)
+					var txId = await createTransaction(email, tx.fields, '', '', currency.name, signatureInfo.signature.toString(), 0, [], tx.price)
 					updateIntent({
-						id: intent.id,
+						id: tx.id,
 						is_paid: true,
 						transaction_hash: signatureInfo.signature.toString(),
-						from_email: email
+						from_data: {
+							email: email
+						}
 					})
 					toast.success('Payment Successful')
 					// setIsModalOpen(false)

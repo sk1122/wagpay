@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@biconomy/hyphen": "^1.0.1",
     "@headlessui/react": "^1.5.0",
     "@heroicons/react": "^1.0.6",
     "@solana/buffer-layout": "^4.0.0",

@@ -2,11 +2,11 @@ import toast from "react-hot-toast"
 
 const useIntent = () => {
 	const updateIntent = async (intent_data: object) => {
-		const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/paymentIntents/`, {
+		const data = await fetch(`http://localhost:5000/api/paymentIntents/`, {
 			method: 'PATCH',
 			body: JSON.stringify(intent_data),
 			headers: {
-			'Content-Type': 'application/json'
+				'Content-Type': 'application/json'
 			}
 		})
 		if(data.status >= 400) toast.error("Can't talk with backend")

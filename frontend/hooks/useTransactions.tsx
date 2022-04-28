@@ -31,19 +31,23 @@ const useTransactions = () => {
 		selectedProducts: any,
 		total_prices: number
 	) {
-		const transaction = {
+		console.log(total_prices)
+		let transaction: any = {
 		  email: email,
 		  fields: fields,
 		  eth_address: eth,
 		  sol_address: sol,
-		  pagesId: page_id,
 		  currency: currency,
 		  products: {connect: selectedProducts.map((value: any) => {return {id: value.id}})},
 		  transaction_hash: txHash,
 		  total_prices: total_prices
 		}
 
-		const data = await fetch('${process.env.NEXT_BACKEND_URL}/api/submissions/', {
+		if(page_id !== 0) {
+			transaction.pagesId = page_id
+		}
+
+		const data = await fetch(`http://localhost:5000/api/submissions/`, {
 		  method: 'POST',
 		  body: JSON.stringify(transaction),
 		  headers: {
@@ -57,7 +61,7 @@ const useTransactions = () => {
 	}
 
 	async function getTotalEarned() {
-		const data = await fetch('${process.env.NEXT_BACKEND_URL}/api/submissions/total_earned', {
+		const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/submissions/total_earned`, {
 		  headers: {
 			'bearer-token': supabase.auth.session()?.access_token as string,
 			'Content-Type': 'application/json'
