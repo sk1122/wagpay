@@ -47,7 +47,7 @@ const useTransactions = () => {
 			transaction.pagesId = page_id
 		}
 
-		const data = await fetch(`http://localhost:5000/api/submissions/`, {
+		const data = await fetch(`http://web-production-eb76.up.railway.app/api/submissions/`, {
 		  method: 'POST',
 		  body: JSON.stringify(transaction),
 		  headers: {

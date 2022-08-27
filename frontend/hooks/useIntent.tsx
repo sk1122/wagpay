@@ -2,7 +2,7 @@ import toast from "react-hot-toast"
 
 const useIntent = () => {
 	const updateIntent = async (intent_data: object) => {
-		const data = await fetch(`http://localhost:5000/api/paymentIntents/`, {
+		const data = await fetch(`https://web-production-eb76.up.railway.app/api/paymentIntents/`, {
 			method: 'PATCH',
 			body: JSON.stringify(intent_data),
 			headers: {
