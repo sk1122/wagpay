@@ -7,7 +7,7 @@ const useTransactions = () => {
 	const [totalEarned, setTotalEarned] = useState(0)
 
 	async function getTransactions(cursor?: number) {
-		const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/submissions/?cursor=${cursor?.toString()}`, {
+		const data = await fetch(`https://web-production-eb76.up.railway.app/api/submissions/?cursor=${cursor?.toString()}`, {
 			headers: {
 				'bearer-token': supabase.auth.session()?.access_token as string,
 			},
@@ -47,7 +47,7 @@ const useTransactions = () => {
 			transaction.pagesId = page_id
 		}
 
-		const data = await fetch(`http://web-production-eb76.up.railway.app/api/submissions/`, {
+		const data = await fetch(`https://web-production-eb76.up.railway.app/api/submissions/`, {
 		  method: 'POST',
 		  body: JSON.stringify(transaction),
 		  headers: {
@@ -61,7 +61,7 @@ const useTransactions = () => {
 	}
 
 	async function getTotalEarned() {
-		const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/submissions/total_earned`, {
+		const data = await fetch(`https://web-production-eb76.up.railway.app/api/submissions/total_earned`, {
 		  headers: {
 			'bearer-token': supabase.auth.session()?.access_token as string,
 			'Content-Type': 'application/json'

@@ -34,7 +34,7 @@ interface Props {
 export const getServerSideProps = async (context: any) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_BACKEND_URL}/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
+      `https://web-production-eb76.up.railway.app/api/pages/get?slug=${context.params.store}&username=${context.params.username}`
     )
     const store: Page = await res.json()
     return {
@@ -63,7 +63,7 @@ const Store = ({ store }: Props) => {
   const updateVisit = async () => {
     console.log(store.id)
     let data = await fetch(
-      `${process.env.NEXT_BACKEND_URL}/api/pages`,
+      `https://web-production-eb76.up.railway.app/api/pages`,
       {
         method: 'PATCH',
         body: JSON.stringify({

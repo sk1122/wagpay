@@ -7,7 +7,7 @@ const useInvoices = () => {
 
 	async function getInvoices(cursor?: number) {
 		if(!cursor) {
-			const data = await fetch('${process.env.NEXT_BACKEND_URL}/api/invoices/', {
+			const data = await fetch('https://web-production-eb76.up.railway.app/api/invoices/', {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -15,7 +15,7 @@ const useInvoices = () => {
 			const res = await data.json()
 			setInvoices(res)
 		} else {
-			const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/invoices?cursor=${cursor.toString()}`, {
+			const data = await fetch(`https://web-production-eb76.up.railway.app/api/invoices?cursor=${cursor.toString()}`, {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -26,7 +26,7 @@ const useInvoices = () => {
 	}
 
 	async function createInvoices(invoice: Invoice) {
-		var data = await fetch('${process.env.NEXT_BACKEND_URL}/api/invoices/', {
+		var data = await fetch('https://web-production-eb76.up.railway.app/api/invoices/', {
 			method: 'POST',
 			body: JSON.stringify(invoice),
 			headers: {

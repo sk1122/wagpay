@@ -7,7 +7,7 @@ const usePages = () => {
 
 	async function getPages(cursor?: number) {
 		if(!cursor) {
-			const data = await fetch('${process.env.NEXT_BACKEND_URL}/api/pages/', {
+			const data = await fetch('https://web-production-eb76.up.railway.app/api/pages/', {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -15,7 +15,7 @@ const usePages = () => {
 			const res = await data.json()
 			setPages(res)
 		} else {
-			const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/pages?cursor=${cursor.toString()}`, {
+			const data = await fetch(`https://web-production-eb76.up.railway.app/api/pages?cursor=${cursor.toString()}`, {
 				headers: {
 					'bearer-token': supabase.auth.session()?.access_token as string,
 				},
@@ -26,7 +26,7 @@ const usePages = () => {
 	}
 
 	async function createPage(page: Page) {
-		var data = await fetch('${process.env.NEXT_BACKEND_URL}/api/pages/', {
+		var data = await fetch('https://web-production-eb76.up.railway.app/api/pages/', {
 			method: 'POST',
 			body: JSON.stringify(page),
 			headers: {

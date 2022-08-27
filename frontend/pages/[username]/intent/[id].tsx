@@ -63,7 +63,7 @@ const expiredHTML = () => {
 }
 
 export const getServerSideProps = async (context: any) => {
-	const data = await fetch(`${process.env.NEXT_BACKEND_URL}/api/paymentIntents/${context.params.id}`)
+	const data = await fetch(`https://web-production-eb76.up.railway.app/api/paymentIntents/${context.params.id}`)
 	if(data.status == 400) {
 		return {
 			props: {
